@@ -104,25 +104,25 @@
             100% { transform: translateY(0px) rotate(0deg); }
         }
 
-        /* Significantly Enlarged Logo Container on Loading Page */
+        /* Significantly Taller & Larger Logo Container on Loading Page */
         .splash-logo-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 2;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             width: 100%;
         }
 
         .splash-logo-img {
-            width: clamp(320px, 85vw, 680px);
-            height: clamp(180px, 48vw, 380px);
-            border-radius: 10px;
+            width: clamp(340px, 90vw, 740px);
+            height: clamp(230px, 60vw, 480px); /* Made noticeably taller */
+            border-radius: 12px;
             object-fit: contain;
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.7);
             border: 2px solid var(--accent-gold);
-            box-shadow: 0 8px 25px rgba(197, 160, 89, 0.4);
+            box-shadow: 0 10px 30px rgba(197, 160, 89, 0.45);
         }
 
         /* Shifted Downwards Content Wrapper */
@@ -130,7 +130,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 20px;
+            margin-top: 15px;
             z-index: 2;
         }
 
@@ -139,7 +139,7 @@
             font-weight: 900;
             letter-spacing: 0.25em;
             color: #1b365d;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             text-align: center;
         }
 
@@ -148,7 +148,7 @@
             letter-spacing: 0.35em;
             color: #8c733f;
             text-transform: uppercase;
-            margin-bottom: 18px;
+            margin-bottom: 12px;
             text-align: center;
         }
 
@@ -159,7 +159,7 @@
             position: relative;
             overflow: hidden;
             border-radius: 2px;
-            margin-bottom: 18px;
+            margin-bottom: 12px;
         }
 
         .loader-progress {
@@ -761,7 +761,7 @@
                 }
             </script>
 
-            <!-- Significantly Enlarged Logo Container (IMG_7155.jpeg) -->
+            <!-- Taller & Larger Logo Container (IMG_7155.jpeg) -->
             <div class="splash-logo-container">
                 <img src="IMG_7155.jpeg" class="splash-logo-img" alt="Urban Thread Logo" crossorigin="anonymous">
             </div>
@@ -1434,6 +1434,7 @@
                 const tbody = document.getElementById('admin-orders-body');
                 tbody.innerHTML = '';
                 
+                snapshot.failed = false;
                 snapshot.forEach((doc) => {
                     let ord = doc.data();
                     let docId = doc.id;
