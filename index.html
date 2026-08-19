@@ -55,7 +55,6 @@
             min-height: 100vh;
         }
 
-        /* --- RESPONSIVE CONTAINER UTILITY --- */
         .page-wrapper {
             width: 100%;
             max-width: 1440px;
@@ -81,7 +80,6 @@
             padding: 20px;
         }
 
-        /* Floating background sewing emojis */
         .floating-emoji {
             position: absolute;
             font-size: clamp(1rem, 2.5vw, 1.8rem);
@@ -309,6 +307,29 @@
             margin-bottom: 30px;
             border-left: 5px solid var(--accent-gold);
             box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .dashboard-actions {
+            margin-bottom: 15px;
+        }
+
+        .btn-check-status {
+            background: var(--accent-blue);
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 4px;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: opacity 0.2s;
+        }
+
+        .btn-check-status:hover {
+            opacity: 0.9;
         }
 
         .ai-assistant-card {
@@ -698,7 +719,7 @@
             <img src="https://i.ibb.co/6R22727/IMG-20260219-WA0001.jpg" class="splash-logo-img" alt="Urban Thread Logo" crossorigin="anonymous">
             
             <div class="splash-logo-text">URBAN THREAD</div>
-            <div class="splash-sub">Forged in Rebellion</div>
+            <div class="splash-sub">Forged in Creativity</div>
             
             <div class="loader-bar">
                 <div class="loader-progress"></div>
@@ -726,7 +747,7 @@
             <!-- HOME PAGE VIEW -->
             <div id="home-view">
                 <section class="hero">
-                    <h1>Forged in Rebellion</h1>
+                    <h1>Forged in Creativity</h1>
                     <p>Built Different. Made to Last.</p>
                 </section>
 
@@ -735,13 +756,20 @@
                     <div class="dashboard-banner">
                         <h2 id="user-greeting" style="color: #1b365d; font-size: 1.15rem; margin-bottom: 12px;">Hi, @guest</h2>
                         
+                        <!-- Order Status Button Added to Dashboard -->
+                        <div class="dashboard-actions">
+                            <button class="btn-check-status" onclick="switchPage('orders')">📦 Check All Orders & Status</button>
+                        </div>
+
                         <!-- AI Assistant Card -->
                         <div class="ai-assistant-card">
                             <h3 style="font-size: 0.9rem; color: #1b365d; margin-bottom: 6px;">🤖 Help / AI Assistant</h3>
                             <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 8px;">Tap a quick question below for instant answers:</p>
                             <div class="ai-btns">
-                                <button onclick="aiAnswer('navigate')">How to navigate</button>
+                                <button onclick="aiAnswer('signup')">How to sign up / login</button>
                                 <button onclick="aiAnswer('order')">How to order</button>
+                                <button onclick="aiAnswer('pay')">How to pay</button>
+                                <button onclick="aiAnswer('navigate')">How to navigate</button>
                             </div>
                             <div id="ai-response-box">Select a question above to get instant help.</div>
                         </div>
@@ -951,10 +979,14 @@
         // AI Assistant Instant Answer Handler
         function aiAnswer(type) {
             const box = document.getElementById('ai-response-box');
-            if (type === 'navigate') {
-                box.innerText = "💡 Use the top menu links (Collection, Reviews, Cart) to browse products and manage your selections across pages easily.";
+            if (type === 'signup') {
+                box.innerText = "💡 Click the 'Sign In' button at the top header to sign in or create a brand new account instantly.";
             } else if (type === 'order') {
-                box.innerText = "💡 Select your preferred size on any item, click 'Add to Cart', head to your cart, and fill out your delivery details to complete an order.";
+                box.innerText = "💡 Choose your size on any item, click 'Add to Cart', open your cart drawer, and click 'Proceed to Secure Checkout' to place an order.";
+            } else if (type === 'pay') {
+                box.innerText = "💡 Payments are done via Direct Bank Transfer. Enter your correct sender account name during checkout and make the transfer to complete your order.";
+            } else if (type === 'navigate') {
+                box.innerText = "💡 Use the top header links ('Collection', 'Reviews', 'My Orders', 'Cart') or the dashboard button to easily switch between sections.";
             }
         }
 
