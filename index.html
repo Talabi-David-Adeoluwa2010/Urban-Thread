@@ -11,8 +11,9 @@
             emailjs.init("YOUR_PUBLIC_KEY");
         })();
     </script>
-    <!-- Firebase SDK -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script>
         const firebaseConfig = {
@@ -26,6 +27,7 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        const auth = firebase.auth();
     </script>
     <style>
         :root {
@@ -67,14 +69,12 @@
             transition: opacity 1s ease-in-out;
         }
 
-        .splash-logo-img {
-            width: 140px;
-            height: 140px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 2px solid #cbd5e1;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        .splash-logo-text {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: 0.2em;
+            color: #0f172a;
+            margin-bottom: 10px;
         }
 
         .splash-sub {
@@ -211,7 +211,7 @@
             text-transform: uppercase;
         }
 
-        /* Catalog Layout */
+        /* Containers & Views */
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -263,7 +263,6 @@
             font-weight: 600;
         }
 
-        /* Size Matrix */
         .size-selector {
             display: flex;
             gap: 5px;
@@ -306,15 +305,15 @@
             font-size: 0.8rem;
         }
 
-        /* Dedicated Reviews View Container */
-        #reviews-view {
+        /* Views (Home, Reviews, Orders) */
+        #reviews-view, #orders-view {
             display: none;
             max-width: 800px;
             margin: 0 auto;
             padding: 40px 15px;
         }
 
-        .review-card {
+        .review-card, .order-card {
             background: var(--card-bg);
             border: 1px solid var(--gray-border);
             padding: 20px;
@@ -437,8 +436,8 @@
             font-size: 0.85rem;
         }
 
-        /* Checkout Form Modal */
-        #checkout-modal {
+        /* Modals (Auth & Checkout) */
+        #auth-modal, #checkout-modal, #admin-modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -450,12 +449,12 @@
             padding: 15px;
         }
 
-        .checkout-box {
+        .modal-box {
             background: #ffffff;
             border: 1px solid var(--gray-border);
             padding: 25px;
             width: 100%;
-            max-width: 460px;
+            max-width: 420px;
             border-radius: 8px;
         }
 
@@ -487,38 +486,7 @@
             gap: 10px;
         }
 
-        /* Admin Backdoor Modal */
-        #admin-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 5000;
-            justify-content: center;
-            align-items: center;
-            padding: 15px;
-        }
-
-        .admin-box {
-            background: #ffffff;
-            border: 1px solid var(--gray-border);
-            padding: 30px;
-            width: 100%;
-            max-width: 360px;
-            text-align: center;
-        }
-
-        .admin-box input {
-            width: 100%;
-            padding: 10px;
-            background: #f8fafc;
-            border: 1px solid #cbd5e1;
-            color: #0f172a;
-            margin: 15px 0;
-            text-align: center;
-            letter-spacing: 0.1em;
-        }
-
+        /* Admin Dashboard */
         #admin-dashboard {
             display: none;
             padding: 20px;
@@ -558,9 +526,9 @@
 </head>
 <body>
 
-    <!-- CINEMATIC SPLASH SCREEN WITH LOGO -->
+    <!-- CINEMATIC SPLASH SCREEN -->
     <div id="splash-screen">
-        <img src="https://i.ibb.co/6R22727/IMG-20260219-WA0001.jpg" class="splash-logo-img" alt="Urban Thread Logo" crossorigin="anonymous">
+        <div class="splash-logo-text">URBAN THREAD</div>
         <div class="splash-sub">Forged in Creativity</div>
         <div class="loader-bar">
             <div class="loader-progress"></div>
@@ -577,8 +545,9 @@
             <ul class="nav-links">
                 <li><a onclick="switchPage('home')" id="nav-home" class="active">Collection</a></li>
                 <li><a onclick="switchPage('reviews')" id="nav-reviews">Reviews</a></li>
+                <li><a onclick="switchPage('orders')" id="nav-orders" style="display:none;">My Orders</a></li>
                 <li><a onclick="toggleCart()">Cart (<span id="cart-count">0</span>)</a></li>
-                <li><button class="btn-auth" onclick="alert('Account creation is optional and available during checkout.')">Sign In</button></li>
+                <li><button class="btn-auth" id="auth-btn-label" onclick="handleAuthClick()">Sign In</button></li>
             </ul>
         </header>
 
@@ -595,7 +564,7 @@
             </div>
         </div>
 
-        <!-- DEDICATED REVIEWS PAGE VIEW -->
+        <!-- REVIEWS PAGE VIEW -->
         <div id="reviews-view">
             <h2 class="section-title">Global Community Feedback</h2>
             <div id="reviews-feed"></div>
@@ -611,6 +580,12 @@
                 <textarea id="rev-comment" placeholder="Write your review here..." rows="4"></textarea>
                 <button class="btn-add-cart" onclick="submitReview()">Submit Review</button>
             </div>
+        </div>
+
+        <!-- MY ORDERS PAGE VIEW -->
+        <div id="orders-view">
+            <h2 class="section-title">My Order History</h2>
+            <div id="my-orders-feed"></div>
         </div>
     </div>
 
@@ -630,9 +605,32 @@
         <button class="checkout-btn" onclick="openCheckoutForm()">Proceed to Secure Checkout</button>
     </div>
 
+    <!-- AUTH MODAL (LOGIN / SIGNUP) -->
+    <div id="auth-modal">
+        <div class="modal-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 id="auth-modal-title">Sign In to Urban Thread</h3>
+                <button onclick="closeAuthModal()" style="background:none; border:none; font-size:1.4rem; cursor:pointer;">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="auth-email" placeholder="name@example.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="auth-password" placeholder="••••••••">
+            </div>
+            <button class="btn-add-cart" id="auth-submit-btn" onclick="performAuthAction()">Sign In</button>
+            <p style="text-align:center; margin-top:15px; font-size:0.8rem;">
+                <span id="auth-switch-text">Don't have an account?</span> 
+                <a onclick="toggleAuthMode()" style="color:var(--accent-blue); cursor:pointer; font-weight:bold;" id="auth-switch-link">Sign Up</a>
+            </p>
+        </div>
+    </div>
+
     <!-- CHECKOUT FORM MODAL -->
     <div id="checkout-modal">
-        <div class="checkout-box">
+        <div class="modal-box">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <h3>Checkout & Delivery</h3>
                 <button onclick="closeCheckoutForm()" style="background:none; border:none; font-size:1.4rem; cursor:pointer;">&times;</button>
@@ -666,10 +664,14 @@
                 </div>
             </div>
             <div class="form-group">
-                <label>Select Payment Method:</label>
+                <label>Payment Method</label>
                 <select id="chk-payment">
                     <option value="Bank Transfer">Direct Bank Transfer (OPay)</option>
                 </select>
+            </div>
+            <div class="form-group">
+                <label>Sender Account Name (Name on bank account paying from)</label>
+                <input type="text" id="chk-sender-name" placeholder="e.g. John Doe">
             </div>
             <button class="btn-add-cart" onclick="submitOrder()" style="margin-top:5px;">Complete Order</button>
         </div>
@@ -677,7 +679,7 @@
 
     <!-- SECRET ADMIN BACKDOOR MODAL -->
     <div id="admin-modal">
-        <div class="admin-box">
+        <div class="modal-box" style="text-align:center;">
             <h3>Secret Admin Control</h3>
             <p style="color: #64748b; font-size: 0.75rem; margin-top: 5px;">Enter Access Password</p>
             <input type="password" id="admin-pwd-input" placeholder="••••••••••••">
@@ -699,6 +701,7 @@
                 <tr>
                     <th>Order ID</th>
                     <th>Customer Details</th>
+                    <th>Sender Account Name</th>
                     <th>Delivery Address</th>
                     <th>Items & Sizes</th>
                     <th>Total</th>
@@ -724,24 +727,115 @@
 
         let cart = [];
         let selectedSizes = {};
+        let currentUser = null;
+        let isSignUpMode = false;
+
+        // Firebase Auth State Observer (Persistent across refreshes & devices)
+        auth.onAuthStateChanged((user) => {
+            currentUser = user;
+            const authBtn = document.getElementById('auth-btn-label');
+            const ordersNav = document.getElementById('nav-orders');
+
+            if (user) {
+                authBtn.innerText = 'Logout';
+                ordersNav.style.display = 'block';
+                loadMyOrders();
+            } else {
+                authBtn.innerText = 'Sign In';
+                ordersNav.style.display = 'none';
+            }
+        });
+
+        function handleAuthClick() {
+            if (currentUser) {
+                if (confirm('Are you sure you want to log out?')) {
+                    auth.signOut().then(() => {
+                        alert('Logged out successfully.');
+                        switchPage('home');
+                    });
+                }
+            } else {
+                openAuthModal();
+            }
+        }
+
+        function openAuthModal() {
+            document.getElementById('auth-modal').style.display = 'flex';
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').style.display = 'none';
+        }
+
+        function toggleAuthMode() {
+            isSignUpMode = !isSignUpMode;
+            document.getElementById('auth-modal-title').innerText = isSignUpMode ? 'Create Urban Thread Account' : 'Sign In to Urban Thread';
+            document.getElementById('auth-submit-btn').innerText = isSignUpMode ? 'Sign Up' : 'Sign In';
+            document.getElementById('auth-switch-text').innerText = isSignUpMode ? 'Already have an account?' : "Don't have an account?";
+            document.getElementById('auth-switch-link').innerText = isSignUpMode ? 'Sign In' : 'Sign Up';
+        }
+
+        function performAuthAction() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+
+            if (!email || !password) {
+                alert('Please enter both email and password.');
+                return;
+            }
+
+            if (isSignUpMode) {
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        alert('Account created successfully!');
+                        closeAuthModal();
+                    })
+                    .catch((error) => {
+                        alert('Sign Up Error: ' + error.message);
+                    });
+            } else {
+                auth.signInWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        alert('Signed in successfully!');
+                        closeAuthModal();
+                    })
+                    .catch((error) => {
+                        alert('Sign In Error: ' + error.message);
+                    });
+            }
+        }
 
         function switchPage(page) {
             const homeView = document.getElementById('home-view');
             const reviewsView = document.getElementById('reviews-view');
+            const ordersView = document.getElementById('orders-view');
             const navHome = document.getElementById('nav-home');
             const navReviews = document.getElementById('nav-reviews');
+            const navOrders = document.getElementById('nav-orders');
+
+            homeView.style.display = 'none';
+            reviewsView.style.display = 'none';
+            ordersView.style.display = 'none';
+            navHome.classList.remove('active');
+            navReviews.classList.remove('active');
+            if (navOrders) navOrders.classList.remove('active');
 
             if (page === 'home') {
                 homeView.style.display = 'block';
-                reviewsView.style.display = 'none';
                 navHome.classList.add('active');
-                navReviews.classList.remove('active');
             } else if (page === 'reviews') {
-                homeView.style.display = 'none';
                 reviewsView.style.display = 'block';
                 navReviews.classList.add('active');
-                navHome.classList.remove('active');
                 loadReviews();
+            } else if (page === 'orders') {
+                if (!currentUser) {
+                    alert('Please sign in to view your orders.');
+                    openAuthModal();
+                    return;
+                }
+                ordersView.style.display = 'block';
+                if (navOrders) navOrders.classList.add('active');
+                loadMyOrders();
             }
         }
 
@@ -870,6 +964,12 @@
                 alert('Your shopping cart is empty.');
                 return;
             }
+            if (!currentUser) {
+                alert('Please sign in or create an account to proceed with your order.');
+                toggleCart();
+                openAuthModal();
+                return;
+            }
             toggleCart();
             document.getElementById('checkout-modal').style.display = 'flex';
         }
@@ -885,9 +985,10 @@
             let address = document.getElementById('chk-address').value;
             let city = document.getElementById('chk-city').value;
             let state = document.getElementById('chk-state').value;
+            let senderName = document.getElementById('chk-sender-name').value;
 
-            if (!name || !email || !phone || !address) {
-                alert('Please fill in all required delivery fields.');
+            if (!name || !email || !phone || !address || !senderName) {
+                alert('Please fill in all required delivery fields, including the sender account name.');
                 return;
             }
 
@@ -896,10 +997,12 @@
 
             let newOrder = {
                 id: orderId,
+                uid: currentUser ? currentUser.uid : 'guest',
                 name: name,
                 email: email,
                 phone: phone,
                 address: `${address}, ${city}, ${state}`,
+                senderName: senderName,
                 items: cart.map(c => `${c.name} [Size: ${c.selectedSize}] (Qty: ${c.quantity})`).join(', '),
                 total: '₦' + totalAmount.toLocaleString(),
                 status: 'Pending Bank Transfer Verification',
@@ -911,8 +1014,39 @@
                 closeCheckoutForm();
                 cart = [];
                 updateCartUI();
+                switchPage('orders');
             }).catch(error => {
                 alert("Error placing order: " + error.message);
+            });
+        }
+
+        function loadMyOrders() {
+            if (!currentUser) return;
+            db.collection("orders").where("uid", "==", currentUser.uid).onSnapshot((snapshot) => {
+                const feed = document.getElementById('my-orders-feed');
+                feed.innerHTML = '';
+
+                if (snapshot.empty) {
+                    feed.innerHTML = '<p style="color:#64748b; font-size:0.85rem;">You have not placed any orders yet.</p>';
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    let ord = doc.data();
+                    let isSuccessful = ord.status.includes('Successful');
+                    feed.innerHTML += `
+                        <div class="order-card">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                                <strong style="font-size:0.85rem; color:#0f172a;">Order ID: ${ord.id}</strong>
+                                <span style="font-size:0.75rem; color: ${isSuccessful ? '#16a34a' : '#f59e0b'}; font-weight:bold;">${ord.status}</span>
+                            </div>
+                            <p style="font-size:0.8rem; margin-bottom:4px;"><strong>Items:</strong> ${ord.items}</p>
+                            <p style="font-size:0.8rem; margin-bottom:4px;"><strong>Total:</strong> ${ord.total}</p>
+                            <p style="font-size:0.8rem; margin-bottom:4px;"><strong>Sender Name:</strong> ${ord.senderName || 'N/A'}</p>
+                            <p style="font-size:0.8rem;"><strong>Delivery Address:</strong> ${ord.address}</p>
+                        </div>
+                    `;
+                });
             });
         }
 
@@ -1011,6 +1145,7 @@
                         <tr>
                             <td>${ord.id}</td>
                             <td>${ord.name}<br><small style="color:#64748b;">${ord.email}<br>${ord.phone}</small></td>
+                            <td style="font-weight:bold; color:var(--accent-orange);">${ord.senderName || 'N/A'}</td>
                             <td>${ord.address || 'N/A'}</td>
                             <td>${ord.items}</td>
                             <td>${ord.total}</td>
