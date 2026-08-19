@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>URBAN THREAD | Forged in Rebellion</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>URBAN THREAD | Forged in Creativity</title>
     <!-- EmailJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
@@ -19,7 +19,7 @@
             apiKey: "AIzaSyBsTBY0xlLSmUjKZdUjSrC-l5DMfXOwbEc",
             authDomain: "urban-threads-store-d9a06.firebaseapp.com",
             projectId: "urban-threads-store-d9a06",
-            storageBucket: "urban-threads-store-d9a06.firebasestorage.app",
+            storageBucket: "urban-threads-store-d9a06.appspot.com",
             messagingSenderId: "594508118134",
             appId: "1:594508118134:web:c784510b58eada58258757",
             measurementId: "G-LXDBJ61QYX"
@@ -48,6 +48,7 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             overflow-x: hidden;
+            width: 100%;
         }
 
         /* --- CINEMATIC SPLASH SCREEN --- */
@@ -66,26 +67,26 @@
             transition: opacity 1s ease-in-out;
         }
 
-        .splash-logo {
-            font-size: clamp(2.5rem, 6vw, 5rem);
-            font-weight: 900;
-            letter-spacing: 0.4em;
-            color: #0f172a;
-            text-transform: uppercase;
-            margin-bottom: 15px;
-            text-align: center;
+        .splash-logo-img {
+            width: 140px;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
         .splash-sub {
-            font-size: 0.85rem;
-            letter-spacing: 0.6em;
-            color: var(--accent-blue);
+            font-size: 0.75rem;
+            letter-spacing: 0.4em;
+            color: #64748b;
             text-transform: uppercase;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         .loader-bar {
-            width: 240px;
+            width: 200px;
             height: 2px;
             background: #e2e8f0;
             position: relative;
@@ -99,7 +100,7 @@
             height: 100%;
             width: 0%;
             background: var(--accent-blue);
-            animation: loadProgress 5s linear forwards;
+            animation: loadProgress 4s linear forwards;
         }
 
         @keyframes loadProgress {
@@ -118,27 +119,41 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 40px;
+            padding: 12px 20px;
             border-bottom: 1px solid var(--gray-border);
             position: sticky;
             top: 0;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(10px);
             z-index: 1000;
         }
 
-        .logo-text {
-            font-size: 1.4rem;
-            font-weight: 900;
-            letter-spacing: 0.25em;
-            color: #0f172a;
+        .brand-logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             text-decoration: none;
             cursor: pointer;
         }
 
+        .header-logo-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #cbd5e1;
+        }
+
+        .logo-text {
+            font-size: 0.95rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            color: #0f172a;
+        }
+
         .nav-links {
             display: flex;
-            gap: 25px;
+            gap: 15px;
             list-style: none;
             align-items: center;
         }
@@ -146,138 +161,123 @@
         .nav-links a {
             color: #64748b;
             text-decoration: none;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.05em;
             transition: color 0.3s;
             cursor: pointer;
         }
 
-        .nav-links a:hover {
+        .nav-links a:hover, .nav-links a.active {
             color: var(--accent-blue);
         }
 
         .btn-auth {
             border: 1px solid #cbd5e1;
-            padding: 8px 18px;
+            padding: 6px 12px;
             background: transparent;
             color: #0f172a;
             cursor: pointer;
             text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.15em;
-            transition: all 0.3s;
-        }
-
-        .btn-auth:hover {
-            border-color: var(--accent-blue);
-            background: var(--accent-blue);
-            color: #fff;
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
         }
 
         /* Hero Banner */
         .hero {
-            height: 70vh;
+            height: 50vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&auto=format&fit=crop&q=80') center/cover no-repeat;
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&auto=format&fit=crop&q=80') center/cover no-repeat;
             padding: 0 20px;
             color: #fff;
         }
 
         .hero h1 {
-            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-size: clamp(2rem, 5vw, 3.5rem);
             text-transform: uppercase;
-            letter-spacing: 0.15em;
-            margin-bottom: 15px;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
             font-weight: 800;
         }
 
         .hero p {
             color: #e2e8f0;
-            font-size: 1rem;
-            letter-spacing: 0.25em;
-            margin-bottom: 30px;
+            font-size: 0.85rem;
+            letter-spacing: 0.15em;
             text-transform: uppercase;
         }
 
         /* Catalog Layout */
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 60px 30px;
+            padding: 40px 15px;
         }
 
         .section-title {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             text-transform: uppercase;
-            letter-spacing: 0.2em;
-            margin-bottom: 40px;
+            letter-spacing: 0.15em;
+            margin-bottom: 30px;
             border-left: 3px solid var(--accent-blue);
-            padding-left: 15px;
+            padding-left: 10px;
             color: #0f172a;
         }
 
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
         }
 
         .product-card {
             background: var(--card-bg);
             border: 1px solid var(--gray-border);
-            padding: 20px;
-            transition: transform 0.3s ease;
-        }
-
-        .product-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--accent-blue);
+            padding: 15px;
         }
 
         .product-img {
             width: 100%;
-            height: 380px;
+            height: 320px;
             object-fit: cover;
             background: #f1f5f9;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .product-name {
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             color: #0f172a;
         }
 
         .product-price {
             color: var(--accent-blue);
-            font-size: 0.95rem;
-            margin-bottom: 15px;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
             font-weight: 600;
         }
 
         /* Size Matrix */
         .size-selector {
             display: flex;
-            gap: 6px;
-            margin-bottom: 15px;
+            gap: 5px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
         }
 
         .size-btn {
             background: transparent;
             border: 1px solid #cbd5e1;
             color: #1e293b;
-            padding: 6px 10px;
-            font-size: 0.75rem;
+            padding: 5px 8px;
+            font-size: 0.7rem;
             cursor: pointer;
-            transition: all 0.2s;
         }
 
         .size-btn.active {
@@ -291,33 +291,62 @@
             opacity: 0.25;
             text-decoration: line-through;
             cursor: not-allowed;
-            border-color: #e2e8f0;
         }
 
-        /* Orange Add to Cart Button */
         .btn-add-cart {
             width: 100%;
             background: var(--accent-orange);
             color: #fff;
             border: none;
-            padding: 12px;
+            padding: 10px;
             text-transform: uppercase;
             font-weight: 700;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.1em;
             cursor: pointer;
-            transition: opacity 0.3s;
+            font-size: 0.8rem;
         }
 
-        .btn-add-cart:hover {
-            opacity: 0.9;
+        /* Dedicated Reviews View Container */
+        #reviews-view {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 15px;
+        }
+
+        .review-card {
+            background: var(--card-bg);
+            border: 1px solid var(--gray-border);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
+
+        .review-form-box {
+            background: #f8fafc;
+            border: 1px solid var(--gray-border);
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 6px;
+        }
+
+        .review-form-box input, .review-form-box textarea, .review-form-box select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 0.85rem;
         }
 
         /* Cart Drawer */
         #cart-drawer {
             position: fixed;
             top: 0;
-            right: -450px;
-            width: 420px;
+            right: -100%;
+            width: 100%;
+            max-width: 380px;
             height: 100vh;
             background: #ffffff;
             border-left: 1px solid var(--gray-border);
@@ -325,7 +354,7 @@
             transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             flex-direction: column;
-            padding: 25px;
+            padding: 20px;
             box-shadow: -10px 0 30px rgba(0,0,0,0.05);
         }
 
@@ -338,36 +367,36 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--gray-border);
-            padding-bottom: 15px;
-            margin-bottom: 15px;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
         }
 
         .close-cart {
             background: none;
             border: none;
             color: #0f172a;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             cursor: pointer;
         }
 
         .cart-items {
             flex-grow: 1;
             overflow-y: auto;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .cart-item {
             display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 12px;
             border-bottom: 1px solid #f1f5f9;
-            padding-bottom: 15px;
+            padding-bottom: 12px;
             align-items: center;
         }
 
         .cart-item-img {
-            width: 70px;
-            height: 80px;
+            width: 60px;
+            height: 70px;
             object-fit: cover;
             background: #f1f5f9;
             border: 1px solid var(--gray-border);
@@ -376,23 +405,23 @@
         .qty-control {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-top: 8px;
+            gap: 8px;
+            margin-top: 5px;
         }
 
         .qty-btn {
             background: #f1f5f9;
             border: 1px solid #cbd5e1;
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             cursor: pointer;
             font-weight: bold;
         }
 
         .cart-summary {
             border-top: 1px solid var(--gray-border);
-            padding-top: 15px;
-            margin-bottom: 15px;
+            padding-top: 12px;
+            margin-bottom: 12px;
         }
 
         .checkout-btn {
@@ -400,14 +429,15 @@
             background: var(--accent-orange);
             color: #fff;
             border: none;
-            padding: 15px;
+            padding: 12px;
             font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.08em;
             cursor: pointer;
+            font-size: 0.85rem;
         }
 
-        /* Modern Checkout Form Modal */
+        /* Checkout Form Modal */
         #checkout-modal {
             display: none;
             position: fixed;
@@ -417,49 +447,47 @@
             justify-content: center;
             align-items: center;
             overflow-y: auto;
-            padding: 20px;
+            padding: 15px;
         }
 
         .checkout-box {
             background: #ffffff;
             border: 1px solid var(--gray-border);
-            padding: 30px;
+            padding: 25px;
             width: 100%;
-            max-width: 500px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-width: 460px;
             border-radius: 8px;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .form-group label {
             display: block;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             color: #475569;
             font-weight: 600;
         }
 
         .form-group input, .form-group select {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background: #f8fafc;
             border: 1px solid #cbd5e1;
             color: #0f172a;
             border-radius: 4px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .form-row {
             display: flex;
-            gap: 15px;
+            gap: 10px;
         }
 
-        /* Secret Admin Backdoor Modal */
+        /* Admin Backdoor Modal */
         #admin-modal {
             display: none;
             position: fixed;
@@ -468,47 +496,49 @@
             z-index: 5000;
             justify-content: center;
             align-items: center;
+            padding: 15px;
         }
 
         .admin-box {
             background: #ffffff;
             border: 1px solid var(--gray-border);
-            padding: 40px;
-            width: 380px;
+            padding: 30px;
+            width: 100%;
+            max-width: 360px;
             text-align: center;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
         .admin-box input {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background: #f8fafc;
             border: 1px solid #cbd5e1;
             color: #0f172a;
-            margin: 20px 0;
+            margin: 15px 0;
             text-align: center;
             letter-spacing: 0.1em;
         }
 
-        /* Secret Admin Dashboard View */
         #admin-dashboard {
             display: none;
-            padding: 40px;
+            padding: 20px;
             max-width: 1400px;
             margin: 0 auto;
+            overflow-x: auto;
         }
 
         .dashboard-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 15px;
+            min-width: 700px;
         }
 
         .dashboard-table th, .dashboard-table td {
             border: 1px solid var(--gray-border);
-            padding: 14px;
+            padding: 10px;
             text-align: left;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
 
         .dashboard-table th {
@@ -519,34 +549,19 @@
             background: #16a34a;
             color: #fff;
             border: none;
-            padding: 8px 14px;
+            padding: 6px 10px;
             cursor: pointer;
             font-weight: bold;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-        }
-
-        /* Global Reviews Section */
-        .reviews-section {
-            margin-top: 80px;
-            border-top: 1px solid var(--gray-border);
-            padding-top: 40px;
-        }
-
-        .review-card {
-            background: var(--card-bg);
-            border: 1px solid var(--gray-border);
-            padding: 20px;
-            margin-bottom: 15px;
+            font-size: 0.7rem;
         }
     </style>
 </head>
 <body>
 
-    <!-- CINEMATIC SPLASH SCREEN -->
+    <!-- CINEMATIC SPLASH SCREEN WITH LOGO -->
     <div id="splash-screen">
-        <div class="splash-logo">Urban Thread</div>
-        <div class="splash-sub">Forged in Rebellion</div>
+        <img src="https://i.ibb.co/6R22727/IMG-20260219-WA0001.jpg" class="splash-logo-img" alt="Urban Thread Logo" crossorigin="anonymous">
+        <div class="splash-sub">Forged in Creativity</div>
         <div class="loader-bar">
             <div class="loader-progress"></div>
         </div>
@@ -555,27 +570,46 @@
     <!-- MAIN STORE FRONT -->
     <div id="main-store">
         <header>
-            <a class="logo-text">URBAN THREAD</a>
+            <a class="brand-logo-container" ondblclick="openAdminModalDirect()">
+                <img src="https://i.ibb.co/6R22727/IMG-20260219-WA0001.jpg" class="header-logo-img" alt="Logo" crossorigin="anonymous">
+                <span class="logo-text">URBAN THREAD</span>
+            </a>
             <ul class="nav-links">
-                <li><a href="#catalog">Collection</a></li>
-                <li><a href="#reviews-section" onclick="loadReviews()">Reviews</a></li>
+                <li><a onclick="switchPage('home')" id="nav-home" class="active">Collection</a></li>
+                <li><a onclick="switchPage('reviews')" id="nav-reviews">Reviews</a></li>
                 <li><a onclick="toggleCart()">Cart (<span id="cart-count">0</span>)</a></li>
                 <li><button class="btn-auth" onclick="alert('Account creation is optional and available during checkout.')">Sign In</button></li>
             </ul>
         </header>
 
-        <section class="hero">
-            <h1>Forged in Rebellion</h1>
-            <p>Built for those who refuse to follow.</p>
-        </section>
+        <!-- HOME PAGE VIEW -->
+        <div id="home-view">
+            <section class="hero">
+                <h1>Forged in Creativity</h1>
+                <p>Crafted for the Visionaries of Tomorrow.</p>
+            </section>
 
-        <div class="container" id="catalog">
-            <h2 class="section-title">Latest Drops</h2>
-            <div class="product-grid" id="product-grid-container"></div>
+            <div class="container" id="catalog">
+                <h2 class="section-title">Latest Drops</h2>
+                <div class="product-grid" id="product-grid-container"></div>
+            </div>
+        </div>
 
-            <div class="reviews-section" id="reviews-section">
-                <h2 class="section-title">Global Community Feedback</h2>
-                <div id="reviews-feed"></div>
+        <!-- DEDICATED REVIEWS PAGE VIEW -->
+        <div id="reviews-view">
+            <h2 class="section-title">Global Community Feedback</h2>
+            <div id="reviews-feed"></div>
+
+            <div class="review-form-box">
+                <h3 style="font-size:1rem; text-transform:uppercase; margin-bottom:12px;">Leave Your Feedback</h3>
+                <input type="text" id="rev-name" placeholder="Your Full Name">
+                <select id="rev-rating">
+                    <option value="★★★★★">★★★★★ (5/5 Stars)</option>
+                    <option value="★★★★☆">★★★★☆ (4/5 Stars)</option>
+                    <option value="★★★☆☆">★★★☆☆ (3/5 Stars)</option>
+                </select>
+                <textarea id="rev-comment" placeholder="Write your review here..." rows="4"></textarea>
+                <button class="btn-add-cart" onclick="submitReview()">Submit Review</button>
             </div>
         </div>
     </div>
@@ -588,7 +622,7 @@
         </div>
         <div class="cart-items" id="cart-items-container"></div>
         <div class="cart-summary">
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-weight:600;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-weight:600; font-size:0.9rem;">
                 <span>Subtotal:</span>
                 <span id="cart-subtotal" style="color:var(--accent-blue);">₦0</span>
             </div>
@@ -599,11 +633,11 @@
     <!-- CHECKOUT FORM MODAL -->
     <div id="checkout-modal">
         <div class="checkout-box">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <h3>Checkout & Delivery</h3>
-                <button onclick="closeCheckoutForm()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+                <button onclick="closeCheckoutForm()" style="background:none; border:none; font-size:1.4rem; cursor:pointer;">&times;</button>
             </div>
-            <p style="color:#64748b; font-size:0.8rem; margin-bottom:20px;">Provide your accurate delivery information for fulfillment.</p>
+            <p style="color:#64748b; font-size:0.75rem; margin-bottom:15px;">Provide your accurate delivery information for fulfillment.</p>
             
             <div class="form-group">
                 <label>Full Name</label>
@@ -637,7 +671,7 @@
                     <option value="Bank Transfer">Direct Bank Transfer (OPay)</option>
                 </select>
             </div>
-            <button class="btn-add-cart" onclick="submitOrder()" style="margin-top:10px;">Complete Order</button>
+            <button class="btn-add-cart" onclick="submitOrder()" style="margin-top:5px;">Complete Order</button>
         </div>
     </div>
 
@@ -648,14 +682,14 @@
             <p style="color: #64748b; font-size: 0.75rem; margin-top: 5px;">Enter Access Password</p>
             <input type="password" id="admin-pwd-input" placeholder="••••••••••••">
             <button class="btn-add-cart" onclick="verifyAdminPassword()">Login</button>
-            <button style="background:none; border:none; color:#64748b; margin-top:15px; cursor:pointer; font-size:0.8rem;" onclick="closeAdminModal()">Cancel</button>
+            <button style="background:none; border:none; color:#64748b; margin-top:12px; cursor:pointer; font-size:0.75rem;" onclick="closeAdminModal()">Cancel</button>
         </div>
     </div>
 
     <!-- SECRET ADMIN DASHBOARD VIEW -->
     <div id="admin-dashboard">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <h2>Admin Control Center — Bank Transfer Verification & Sync</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>Admin Control Center — Bank Transfer Verification</h2>
             <button class="btn-auth" onclick="logoutAdmin()">Logout</button>
         </div>
         
@@ -669,7 +703,7 @@
                     <th>Items & Sizes</th>
                     <th>Total</th>
                     <th>Payment Status</th>
-                    <th>Manual Verification Action</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody id="admin-orders-body"></tbody>
@@ -686,10 +720,30 @@
                 store.style.display = 'block';
                 store.style.opacity = '1';
             }, 1000);
-        }, 5000);
+        }, 4000);
 
         let cart = [];
         let selectedSizes = {};
+
+        function switchPage(page) {
+            const homeView = document.getElementById('home-view');
+            const reviewsView = document.getElementById('reviews-view');
+            const navHome = document.getElementById('nav-home');
+            const navReviews = document.getElementById('nav-reviews');
+
+            if (page === 'home') {
+                homeView.style.display = 'block';
+                reviewsView.style.display = 'none';
+                navHome.classList.add('active');
+                navReviews.classList.remove('active');
+            } else if (page === 'reviews') {
+                homeView.style.display = 'none';
+                reviewsView.style.display = 'block';
+                navReviews.classList.add('active');
+                navHome.classList.remove('active');
+                loadReviews();
+            }
+        }
 
         function loadProducts() {
             db.collection("products").onSnapshot((snapshot) => {
@@ -794,16 +848,16 @@
                     <div class="cart-item">
                         <img src="${item.image}" class="cart-item-img" alt="${item.name}">
                         <div style="flex-grow:1;">
-                            <h4 style="font-size:0.85rem; margin-bottom:30px;">${item.name}</h4>
-                            <p style="color:#64748b; font-size:0.7rem; margin-bottom:30px;">Size: ${item.selectedSize}</p>
-                            <p style="color:var(--accent-blue); font-size:0.85rem; font-weight:600; margin-bottom:30px;">${item.price}</p>
+                            <h4 style="font-size:0.8rem; margin-bottom:4px;">${item.name}</h4>
+                            <p style="color:#64748b; font-size:0.7rem; margin-bottom:4px;">Size: ${item.selectedSize}</p>
+                            <p style="color:var(--accent-blue); font-size:0.8rem; font-weight:600; margin-bottom:6px;">${item.price}</p>
                             <div class="qty-control">
                                 <button class="qty-btn" onclick="updateQuantity(${index}, -1)">-</button>
-                                <span style="font-size:0.85rem; font-weight:bold;">${item.quantity}</span>
+                                <span style="font-size:0.8rem; font-weight:bold;">${item.quantity}</span>
                                 <button class="qty-btn" onclick="updateQuantity(${index}, 1)">+</button>
                             </div>
                         </div>
-                        <button onclick="removeFromCart(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:0.75rem;">Remove</button>
+                        <button onclick="removeFromCart(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:0.7rem;">Remove</button>
                     </div>
                 `;
             });
@@ -862,10 +916,65 @@
             });
         }
 
+        function loadReviews() {
+            db.collection("reviews").onSnapshot((snapshot) => {
+                const feed = document.getElementById('reviews-feed');
+                feed.innerHTML = '';
+
+                if (snapshot.empty) {
+                    seedDefaultReviews();
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    let r = doc.data();
+                    feed.innerHTML += `
+                        <div class="review-card">
+                            <div style="color:var(--accent-blue); margin-bottom:4px;">${r.rating}</div>
+                            <p style="margin-bottom:6px; font-size:0.85rem;">"${r.comment}"</p>
+                            <small style="color:#64748b;">— ${r.name}</small>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        function submitReview() {
+            let name = document.getElementById('rev-name').value;
+            let rating = document.getElementById('rev-rating').value;
+            let comment = document.getElementById('rev-comment').value;
+
+            if (!name || !comment) {
+                alert('Please provide your name and comment.');
+                return;
+            }
+
+            db.collection("reviews").add({
+                name: name,
+                rating: rating,
+                comment: comment,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                alert('Review posted successfully!');
+                document.getElementById('rev-name').value = '';
+                document.getElementById('rev-comment').value = '';
+            });
+        }
+
+        function seedDefaultReviews() {
+            const defaultReviews = [
+                { name: 'Marcus T.', rating: '★★★★★', comment: 'The quality of the tech fleece tracksuit is top tier.' },
+                { name: 'Sarah E.', rating: '★★★★★', comment: 'Fast delivery after bank transfer verification.' }
+            ];
+            defaultReviews.forEach(rev => {
+                db.collection("reviews").add(rev);
+            });
+        }
+
         // --- ADMIN BACKDOOR ---
-        document.querySelector('.logo-text').addEventListener('dblclick', () => {
+        function openAdminModalDirect() {
             document.getElementById('admin-modal').style.display = 'flex';
-        });
+        }
 
         function closeAdminModal() {
             document.getElementById('admin-modal').style.display = 'none';
@@ -907,7 +1016,7 @@
                             <td>${ord.total}</td>
                             <td style="color: ${isSuccessful ? '#16a34a' : '#f59e0b'}; font-weight:bold;">${ord.status}</td>
                             <td>
-                                ${!isSuccessful ? `<button class="btn-approve" onclick="approvePayment('${docId}', '${ord.name}', '${ord.email}', '${ord.id}', '${ord.items}', '${ord.total}')">Mark Payment Successful</button>` : 'Verified & Dispatched'}
+                                ${!isSuccessful ? `<button class="btn-approve" onclick="approvePayment('${docId}', '${ord.name}', '${ord.email}', '${ord.id}', '${ord.items}', '${ord.total}')">Mark Success</button>` : 'Verified'}
                             </td>
                         </tr>
                     `;
@@ -933,41 +1042,7 @@
             });
         }
 
-        function loadReviews() {
-            db.collection("reviews").onSnapshot((snapshot) => {
-                const feed = document.getElementById('reviews-feed');
-                feed.innerHTML = '';
-
-                if (snapshot.empty) {
-                    seedDefaultReviews();
-                    return;
-                }
-
-                snapshot.forEach((doc) => {
-                    let r = doc.data();
-                    feed.innerHTML += `
-                        <div class="review-card">
-                            <div style="color:var(--accent-blue); margin-bottom:5px;">${r.rating}</div>
-                            <p style="margin-bottom:8px; font-size:0.9rem;">"${r.comment}"</p>
-                            <small style="color:#64748b;">— ${r.name}</small>
-                        </div>
-                    `;
-                });
-            });
-        }
-
-        function seedDefaultReviews() {
-            const defaultReviews = [
-                { name: 'Marcus T.', rating: '★★★★★', comment: 'The quality of the tech fleece tracksuit is top tier.' },
-                { name: 'Sarah E.', rating: '★★★★★', comment: 'Fast delivery after bank transfer verification.' }
-            ];
-            defaultReviews.forEach(rev => {
-                db.collection("reviews").add(rev);
-            });
-        }
-
         loadProducts();
-        loadReviews();
     </script>
 </body>
 </html>
