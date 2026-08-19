@@ -86,7 +86,7 @@
             z-index: 9999;
             transition: opacity 1s ease-in-out;
             overflow: hidden;
-            padding: 20px;
+            padding: 15px;
         }
 
         .floating-emoji {
@@ -104,24 +104,25 @@
             100% { transform: translateY(0px) rotate(0deg); }
         }
 
-        /* Big Rectangle Logo Container on Loading Page */
+        /* Significantly Enlarged Logo Container on Loading Page */
         .splash-logo-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 2;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            width: 100%;
         }
 
         .splash-logo-img {
-            width: clamp(220px, 45vw, 360px);
-            height: clamp(120px, 25vw, 200px);
-            border-radius: 8px;
+            width: clamp(320px, 85vw, 680px);
+            height: clamp(180px, 48vw, 380px);
+            border-radius: 10px;
             object-fit: contain;
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.6);
             border: 2px solid var(--accent-gold);
-            box-shadow: 0 6px 20px rgba(197, 160, 89, 0.35);
+            box-shadow: 0 8px 25px rgba(197, 160, 89, 0.4);
         }
 
         /* Shifted Downwards Content Wrapper */
@@ -129,36 +130,36 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 35px;
+            margin-top: 20px;
             z-index: 2;
         }
 
         .splash-logo-text {
-            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            font-size: clamp(1.1rem, 2.5vw, 1.6rem);
             font-weight: 900;
             letter-spacing: 0.25em;
             color: #1b365d;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             text-align: center;
         }
 
         .splash-sub {
-            font-size: clamp(0.65rem, 1.5vw, 0.8rem);
+            font-size: clamp(0.6rem, 1.2vw, 0.75rem);
             letter-spacing: 0.35em;
             color: #8c733f;
             text-transform: uppercase;
-            margin-bottom: 25px;
+            margin-bottom: 18px;
             text-align: center;
         }
 
         .loader-bar {
-            width: clamp(160px, 30vw, 240px);
+            width: clamp(150px, 28vw, 220px);
             height: 3px;
             background: #e2e8f0;
             position: relative;
             overflow: hidden;
             border-radius: 2px;
-            margin-bottom: 25px;
+            margin-bottom: 18px;
         }
 
         .loader-progress {
@@ -173,9 +174,9 @@
 
         .splash-credits {
             text-align: center;
-            font-size: clamp(0.65rem, 1.2vw, 0.75rem);
+            font-size: clamp(0.6rem, 1vw, 0.7rem);
             color: #555555;
-            line-height: 1.5;
+            line-height: 1.4;
             letter-spacing: 0.05em;
         }
 
@@ -214,7 +215,6 @@
             cursor: pointer;
         }
 
-        /* Increased Header Logo Size */
         .header-logo-img {
             width: clamp(55px, 8vw, 75px);
             height: clamp(55px, 8vw, 75px);
@@ -275,7 +275,6 @@
             color: #fff;
         }
 
-        /* Back Button Style */
         .btn-back-page {
             background: transparent;
             border: 1px solid var(--accent-blue);
@@ -299,7 +298,6 @@
             color: #fff;
         }
 
-        /* Hero Banner */
         .hero {
             min-height: clamp(350px, 45vh, 500px);
             display: flex;
@@ -328,7 +326,6 @@
             text-transform: uppercase;
         }
 
-        /* Containers & Views */
         .container {
             width: 100%;
             max-width: 1300px;
@@ -346,7 +343,6 @@
             color: #1b365d;
         }
 
-        /* Dashboard Banner & AI Assistant Styles */
         .dashboard-banner {
             background: var(--card-bg);
             padding: 20px;
@@ -516,7 +512,6 @@
             opacity: 0.9;
         }
 
-        /* Views (Home, Reviews, Orders) */
         #reviews-view, #orders-view {
             display: none;
             width: 100%;
@@ -551,7 +546,6 @@
             font-size: 0.9rem;
         }
 
-        /* Cart Drawer */
         #cart-drawer {
             position: fixed;
             top: 0;
@@ -654,7 +648,6 @@
             margin-bottom: 10px;
         }
 
-        /* Modals */
         #auth-modal, #checkout-modal, #admin-modal {
             display: none;
             position: fixed;
@@ -705,7 +698,6 @@
             gap: 12px;
         }
 
-        /* Admin Dashboard */
         #admin-dashboard {
             display: none;
             padding: clamp(20px, 4vw, 40px);
@@ -757,7 +749,6 @@
     <div class="page-wrapper">
         <!-- CINEMATIC SPLASH SCREEN WITH 100 FLOATING EMOJIS -->
         <div id="splash-screen">
-            <!-- 100 Generated Emojis for Background Fill -->
             <script>
                 const emojis = ['🧵', '🪡', '📍'];
                 for (let i = 0; i < 100; i++) {
@@ -770,7 +761,7 @@
                 }
             </script>
 
-            <!-- Big Rectangle Logo Container (IMG_7155.jpeg) -->
+            <!-- Significantly Enlarged Logo Container (IMG_7155.jpeg) -->
             <div class="splash-logo-container">
                 <img src="IMG_7155.jpeg" class="splash-logo-img" alt="Urban Thread Logo" crossorigin="anonymous">
             </div>
@@ -791,7 +782,6 @@
         <!-- MAIN STORE FRONT -->
         <div id="main-store">
             <header>
-                <!-- Header Logo (IMG_7149.jpeg) - Made Bigger -->
                 <a class="brand-logo-container" ondblclick="openAdminModalDirect()">
                     <img src="IMG_7149.jpeg" class="header-logo-img" alt="Logo" crossorigin="anonymous">
                     <span class="logo-text">URBAN THREAD</span>
@@ -813,16 +803,13 @@
                 </section>
 
                 <div class="container">
-                    <!-- Dashboard Greeting, AI Assistant & Admin Contact -->
                     <div class="dashboard-banner">
                         <h2 id="user-greeting" style="color: #1b365d; font-size: 1.15rem; margin-bottom: 12px;">Hi, @guest</h2>
                         
-                        <!-- Order Status Button Added to Dashboard -->
                         <div class="dashboard-actions">
                             <button class="btn-check-status" onclick="switchPage('orders')">📦 Check All Orders & Status</button>
                         </div>
 
-                        <!-- AI Assistant Card -->
                         <div class="ai-assistant-card">
                             <h3 style="font-size: 0.9rem; color: #1b365d; margin-bottom: 6px;">🤖 Help / AI Assistant</h3>
                             <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 8px;">Tap a quick question below for instant answers:</p>
@@ -835,7 +822,6 @@
                             <div id="ai-response-box">Select a question above to get instant help.</div>
                         </div>
 
-                        <!-- Admin Contact -->
                         <div class="admin-contact-box">
                             <p>⚠️ Having issues or errors? Contact Admin: <strong>08024300891</strong></p>
                         </div>
@@ -1015,7 +1001,6 @@
         let currentUser = null;
         let isSignUpMode = false;
 
-        // Firebase Auth State Observer
         auth.onAuthStateChanged((user) => {
             currentUser = user;
             const authBtn = document.getElementById('auth-btn-label');
@@ -1039,7 +1024,6 @@
             }
         });
 
-        // AI Assistant Instant Answer Handler
         function aiAnswer(type) {
             const box = document.getElementById('ai-response-box');
             if (type === 'signup') {
@@ -1420,7 +1404,6 @@
             });
         }
 
-        // --- ADMIN BACKDOOR ---
         function openAdminModalDirect() {
             document.getElementById('admin-modal').style.display = 'flex';
         }
