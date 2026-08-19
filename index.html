@@ -104,23 +104,24 @@
             100% { transform: translateY(0px) rotate(0deg); }
         }
 
-        /* Centered Logo on Loading Page */
+        /* Big Rectangle Logo Container on Loading Page */
         .splash-logo-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 2;
+            margin-bottom: 10px;
         }
 
         .splash-logo-img {
-            width: clamp(80px, 14vw, 120px);
-            height: clamp(80px, 14vw, 120px);
-            border-radius: 50%;
-            object-fit: cover;
+            width: clamp(220px, 45vw, 360px);
+            height: clamp(120px, 25vw, 200px);
+            border-radius: 8px;
+            object-fit: contain;
+            background: rgba(255, 255, 255, 0.5);
             border: 2px solid var(--accent-gold);
-            box-shadow: 0 4px 15px rgba(197, 160, 89, 0.3);
-            margin-bottom: 10px;
+            box-shadow: 0 6px 20px rgba(197, 160, 89, 0.35);
         }
 
         /* Shifted Downwards Content Wrapper */
@@ -128,7 +129,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 30px;
+            margin-top: 35px;
             z-index: 2;
         }
 
@@ -767,7 +768,7 @@
                 }
             </script>
 
-            <!-- Centered Logo (Updated to IMG_7155.jpeg) -->
+            <!-- Big Rectangle Logo Container (IMG_7155.jpeg) -->
             <div class="splash-logo-container">
                 <img src="IMG_7155.jpeg" class="splash-logo-img" alt="Urban Thread Logo" crossorigin="anonymous">
             </div>
