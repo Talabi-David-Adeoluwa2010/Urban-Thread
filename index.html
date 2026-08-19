@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URBAN THREAD | Forged in Rebellion</title>
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            emailjs.init("YOUR_PUBLIC_KEY"); // Replace with your EmailJS Public Key
+        })();
+    </script>
+    <!-- Firebase SDK (Compat Version for seamless single-file global sync) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script>
+        // Replace with your Firebase Project Configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_FIREBASE_API_KEY",
+            authDomain: "your-project-id.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project-id.appspot.com",
+            messagingSenderId: "SENDER_ID",
+            appId: "APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --text-color: #f4f4f4;
+            --accent-gold: #d4af37;
+            --gray-border: #222;
+            --card-bg: #111;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        /* --- 10-SECOND CINEMATIC SPLASH SCREEN --- */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .splash-logo {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 900;
+            letter-spacing: 0.4em;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #fff 30%, #666 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        .splash-sub {
+            font-size: 0.85rem;
+            letter-spacing: 0.6em;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            margin-bottom: 40px;
+        }
+
+        .loader-bar {
+            width: 240px;
+            height: 2px;
+            background: #222;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loader-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background: #fff;
+            animation: loadProgress 10s linear forwards;
+        }
+
+        @keyframes loadProgress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        /* --- MAIN STOREFRONT --- */
+        #main-store {
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            border-bottom: 1px solid var(--gray-border);
+            position: sticky;
+            top: 0;
+            background: rgba(5, 5, 5, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .logo-text {
+            font-size: 1.4rem;
+            font-weight: 900;
+            letter-spacing: 0.25em;
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #aaa;
+            text-decoration: none;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        .btn-auth {
+            border: 1px solid #444;
+            padding: 8px 18px;
+            background: transparent;
+            color: #fff;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            transition: all 0.3s;
+        }
+
+        .btn-auth:hover {
+            border-color: #fff;
+            background: #fff;
+            color: #000;
+        }
+
+        /* Hero Banner */
+        .hero {
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url('image_52.png') center/cover no-repeat;
+            padding: 0 20px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 15px;
+            font-weight: 800;
+        }
+
+        .hero p {
+            color: #aaa;
+            font-size: 1rem;
+            letter-spacing: 0.25em;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        /* Catalog Layout */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 30px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            margin-bottom: 40px;
+            border-left: 2px solid var(--accent-gold);
+            padding-left: 15px;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            border: 1px solid var(--gray-border);
+            padding: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            border-color: #444;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 380px;
+            object-fit: cover;
+            background: #1a1a1a;
+            margin-bottom: 15px;
+        }
+
+        .product-name {
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .product-price {
+            color: var(--accent-gold);
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        /* Size Matrix (XS to XXL) */
+        .size-selector {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .size-btn {
+            background: transparent;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 6px 10px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .size-btn.active {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+            font-weight: bold;
+        }
+
+        .size-btn.out-of-stock {
+            opacity: 0.25;
+            text-decoration: line-through;
+            cursor: not-allowed;
+            border-color: #222;
+        }
+
+        .btn-add-cart {
+            width: 100%;
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 12px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-add-cart:hover {
+            background: var(--accent-gold);
+        }
+
+        /* Cart Drawer */
+        #cart-drawer {
+            position: fixed;
+            top: 0;
+            right: -420px;
+            width: 400px;
+            height: 100vh;
+            background: #0f0f0f;
+            border-left: 1px solid var(--gray-border);
+            z-index: 2000;
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            padding: 30px;
+        }
+
+        #cart-drawer.open {
+            right: 0;
+        }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--gray-border);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .close-cart {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .cart-items {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #1a1a1a;
+            padding-bottom: 15px;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            background: var(--accent-gold);
+            color: #000;
+            border: none;
+            padding: 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+        }
+
+        /* Secret Admin Backdoor Modal */
+        #admin-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92);
+            z-index: 5000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .admin-box {
+            background: #141414;
+            border: 1px solid #333;
+            padding: 40px;
+            width: 380px;
+            text-align: center;
+        }
+
+        .admin-box input {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            border: 1px solid #333;
+            color: #fff;
+            margin: 20px 0;
+            text-align: center;
+            letter-spacing: 0.1em;
+        }
+
+        /* Secret Admin Dashboard View */
+        #admin-dashboard {
+            display: none;
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .dashboard-table th, .dashboard-table td {
+            border: 1px solid var(--gray-border);
+            padding: 14px;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        .dashboard-table th {
+            background: #141414;
+        }
+
+        .btn-approve {
+            background: #1b5e20;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        /* Global Reviews Section */
+        .reviews-section {
+            margin-top: 80px;
+            border-top: 1px solid var(--gray-border);
+            padding-top: 40px;
+        }
+
+        .review-card {
+            background: #111;
+            border: 1px solid #1a1a1a;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 10-SECOND CINEMATIC SPLASH SCREEN -->
+    <div id="splash-screen">
+        <div class="splash-logo">Urban Thread</div>
+        <div class="splash-sub">Forged in Rebellion</div>
+        <div class="loader-bar">
+            <div class="loader-progress"></div>
+        </div>
+    </div>
+
+    <!-- MAIN STORE FRONT -->
+    <div id="main-store">
+        <header>
+            <a class="logo-text">URBAN THREAD</a>
+            <ul class="nav-links">
+                <li><a href="#catalog">Collection</a></li>
+                <li><a href="#reviews-section" onclick="loadReviews()">Reviews</a></li>
+                <li><a onclick="toggleCart()">Cart (<span id="cart-count">0</span>)</a></li>
+                <li><button class="btn-auth" onclick="alert('Account creation is optional and available during checkout.')">Sign In / Register</button></li>
+            </ul>
+        </header>
+
+        <section class="hero">
+            <h1>Forged in Rebellion</h1>
+            <p>Built for those who refuse to follow.</p>
+        </section>
+
+        <div class="container" id="catalog">
+            <h2 class="section-title">Latest Drops</h2>
+            <div class="product-grid" id="product-grid-container">
+                <!-- Dynamically Injected Products from Firestore -->
+            </div>
+
+            <!-- GLOBAL REVIEWS SECTION -->
+            <div class="reviews-section" id="reviews-section">
+                <h2 class="section-title">Global Community Feedback</h2>
+                <div id="reviews-feed">
+                    <!-- Dynamic Reviews Feed -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CART DRAWER -->
+    <div id="cart-drawer">
+        <div class="cart-header">
+            <h3>Your Bag</h3>
+            <button class="close-cart" onclick="toggleCart()">&times;</button>
+        </div>
+        <div class="cart-items" id="cart-items-container">
+            <!-- Cart items -->
+        </div>
+        <button class="checkout-btn" onclick="proceedCheckout()">Proceed to Checkout (OPay Transfer)</button>
+    </div>
+
+    <!-- SECRET ADMIN BACKDOOR MODAL (Double-click the header logo to open) -->
+    <div id="admin-modal">
+        <div class="admin-box">
+            <h3>Secret Admin Control</h3>
+            <p style="color: #777; font-size: 0.75rem; margin-top: 5px;">Enter Access Password</p>
+            <input type="password" id="admin-pwd-input" placeholder="••••••••••••">
+            <button class="btn-add-cart" onclick="verifyAdminPassword()">Login</button>
+            <button style="background:none; border:none; color:#666; margin-top:15px; cursor:pointer; font-size:0.8rem;" onclick="closeAdminModal()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- SECRET ADMIN DASHBOARD VIEW -->
+    <div id="admin-dashboard">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h2>Admin Control Center — OPay Verification & Sync</h2>
+            <button class="btn-auth" onclick="logoutAdmin()">Logout</button>
+        </div>
+        
+        <h3>Incoming Customer Orders (Global Firestore Live Sync)</h3>
+        <table class="dashboard-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer Details</th>
+                    <th>Selected Items & Sizes</th>
+                    <th>Total</th>
+                    <th>Payment Status</th>
+                    <th>Manual Verification Action</th>
+                </tr>
+            </thead>
+            <tbody id="admin-orders-body">
+                <!-- Dynamic Firestore Orders -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // --- 10-SECOND AUTO-LOAD TRANSITION ---
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            const store = document.getElementById('main-store');
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.style.display = 'none';
+                store.style.display = 'block';
+                store.style.opacity = '1';
+            }, 1000);
+        }, 10000);
+
+        let cart = [];
+        let selectedSizes = {};
+
+        // --- FETCH PRODUCTS FROM FIRESTORE GLOBALLY ---
+        function loadProducts() {
+            db.collection("products").onSnapshot((snapshot) => {
+                const grid = document.getElementById('product-grid-container');
+                grid.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    // Seed initial data if collection is empty
+                    seedDefaultProducts();
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    let p = doc.data();
+                    let pId = doc.id;
+                    let sizeButtons = '';
+                    
+                    p.sizes.forEach((sz, idx) => {
+                        let isAvailable = p.stockStatus[idx];
+                        sizeButtons += `<button class="size-btn ${isAvailable ? '' : 'out-of-stock'}" onclick="selectSize('${pId}', '${sz}', this)">${sz}</button>`;
+                    });
+
+                    grid.innerHTML += `
+                        <div class="product-card">
+                            <img src="${p.image}" class="product-img" alt="${p.name}">
+                            <div class="product-name">${p.name}</div>
+                            <div class="product-price">${p.price}</div>
+                            <div class="size-selector" id="sizes-${pId}">${sizeButtons}</div>
+                            <button class="btn-add-cart" onclick="addToCart('${pId}', '${p.name}', '${p.price}', '${p.image}')">Add to Cart</button>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        function seedDefaultProducts() {
+            const defaultProducts = [
+                { name: 'UT Heritage Tech Polo - White', price: '₦45,000', image: 'image_40.png', sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, true, true, true, true] },
+                { name: 'Britain Edition Tech Tracksuit', price: '₦95,000', image: 'image_35.png', sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, true, false, true, true] },
+                { name: 'Military Camo Tracksuit', price: '₦98,000', image: 'image_32.png', sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, true, true, true, false] },
+                { name: 'Black & Gold Luxury Edition', price: '₦110,000', image: 'image_33.png', sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, false, true, true, true] }
+            ];
+            defaultProducts.forEach(prod => {
+                db.collection("products").add(prod);
+            });
+        }
+
+        function selectSize(productId, size, btnElement) {
+            const parent = document.getElementById(`sizes-${productId}`);
+            parent.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+            btnElement.classList.add('active');
+            selectedSizes[productId] = size;
+        }
+
+        function addToCart(productId, name, price, image) {
+            const chosenSize = selectedSizes[productId];
+            if (!chosenSize) {
+                alert('Please select a size (XS to XXL) before adding to cart.');
+                return;
+            }
+            cart.push({ id: productId, name, price, image, selectedSize: chosenSize });
+            document.getElementById('cart-count').innerText = cart.length;
+            renderCartItems();
+            toggleCart();
+        }
+
+        function toggleCart() {
+            document.getElementById('cart-drawer').classList.toggle('open');
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cart-items-container');
+            container.innerHTML = '';
+            cart.forEach((item, index) => {
+                container.innerHTML += `
+                    <div class="cart-item">
+                        <div>
+                            <h4>${item.name}</h4>
+                            <p style="color:#777; font-size:0.75rem;">Size: ${item.selectedSize}</p>
+                            <p style="color:var(--accent-gold);">${item.price}</p>
+                        </div>
+                        <button onclick="removeFromCart(${index})" style="background:none; border:none; color:#ff5252; cursor:pointer; font-size:0.8rem;">Remove</button>
+                    </div>
+                `;
+            });
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            document.getElementById('cart-count').innerText = cart.length;
+            renderCartItems();
+        }
+
+        // --- CHECKOUT & MANUAL OPAY TRANSFER SYNCED TO FIRESTORE ---
+        function proceedCheckout() {
+            if (cart.length === 0) {
+                alert('Your bag is empty.');
+                return;
+            }
+            let customerName = prompt('Enter your Full Name for delivery:');
+            let customerEmail = prompt('Enter your Email Address for tracking receipts:');
+            let customerPhone = prompt('Enter your Phone Number:');
+
+            if (!customerName || !customerEmail) return;
+
+            let orderId = 'UT-' + Math.floor(100000 + Math.random() * 900000);
+            let totalAmount = cart.reduce((sum, item) => sum + parseInt(item.price.replace(/[^\d]/g, '')), 0);
+
+            let newOrder = {
+                id: orderId,
+                name: customerName,
+                email: customerEmail,
+                phone: customerPhone,
+                items: cart.map(c => `${c.name} [Size: ${c.selectedSize}]`).join(', '),
+                total: '₦' + totalAmount.toLocaleString(),
+                status: 'Pending OPay Verification',
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            // Save globally to Firestore
+            db.collection("orders").add(newOrder).then(() => {
+                alert(`Order Placed Globally!\n\nPlease transfer total (${newOrder.total}) to our OPay Account:\nAccount Number: 9012345678\nAccount Name: Urban Thread Ltd\n\nOrder ID: ${orderId}\nOnce you transfer, the admin will manually verify and release your confirmation email.`);
+                
+                cart = [];
+                document.getElementById('cart-count').innerText = 0;
+                toggleCart();
+                renderCartItems();
+            }).catch(error => {
+                alert("Error placing order: " + error.message);
+            });
+        }
+
+        // --- SECRET ADMIN BACKDOOR (Double click header logo) ---
+        document.querySelector('.logo-text').addEventListener('dblclick', () => {
+            document.getElementById('admin-modal').style.display = 'flex';
+        });
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal').style.display = 'none';
+        }
+
+        function verifyAdminPassword() {
+            const pwd = document.getElementById('admin-pwd-input').value;
+            if (pwd === 'urbanadmin123') {
+                closeAdminModal();
+                document.getElementById('main-store').style.display = 'none';
+                document.getElementById('admin-dashboard').style.display = 'block';
+                loadAdminOrders();
+            } else {
+                alert('Incorrect Admin Password');
+            }
+        }
+
+        function logoutAdmin() {
+            document.getElementById('admin-dashboard').style.display = 'none';
+            document.getElementById('main-store').style.display = 'block';
+        }
+
+        // --- LOAD GLOBAL ORDERS FOR ADMIN IN REAL-TIME ---
+        function loadAdminOrders() {
+            db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+                const tbody = document.getElementById('admin-orders-body');
+                tbody.innerHTML = '';
+                
+                snapshot.forEach((doc) => {
+                    let ord = doc.data();
+                    let docId = doc.id;
+                    let isSuccessful = ord.status.includes('Successful');
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${ord.id}</td>
+                            <td>${ord.name}<br><small style="color:#777;">${ord.email}</small></td>
+                            <td>${ord.items}</td>
+                            <td>${ord.total}</td>
+                            <td style="color: ${isSuccessful ? '#4caf50' : '#ff9800'}; font-weight:bold;">${ord.status}</td>
+                            <td>
+                                ${!isSuccessful ? `<button class="btn-approve" onclick="approvePayment('${docId}', '${ord.name}', '${ord.email}', '${ord.id}', '${ord.items}', '${ord.total}')">Mark Payment Successful</button>` : 'Verified & Dispatched'}
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        // --- EMAILJS AUTOMATED EMAIL TRIGGER ON ADMIN APPROVAL ---
+        function approvePayment(docId, name, email, orderId, items, total) {
+            db.collection("orders").doc(docId).update({
+                status: 'Payment Successful & Dispatched'
+            }).then(() => {
+                // Send email via EmailJS
+                emailjs.send("default_service", "template_order_success", {
+                    to_name: name,
+                    to_email: email,
+                    order_id: orderId,
+                    order_items: items,
+                    order_total: total
+                }).then(() => {
+                    alert(`Payment verified successfully for ${name}! Email receipt sent globally via EmailJS.`);
+                }, (error) => {
+                    alert('Payment marked successful in Firestore, but email dispatch failed: ' + JSON.stringify(error));
+                });
+            });
+        }
+
+        // --- GLOBAL COMMUNITY REVIEWS FIRESTORE SYNC ---
+        function loadReviews() {
+            db.collection("reviews").onSnapshot((snapshot) => {
+                const feed = document.getElementById('reviews-feed');
+                feed.innerHTML = '';
+
+                if (snapshot.empty) {
+                    seedDefaultReviews();
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    let r = doc.data();
+                    feed.innerHTML += `
+                        <div class="review-card">
+                            <div style="color:var(--accent-gold); margin-bottom:5px;">${r.rating}</div>
+                            <p style="margin-bottom:8px; font-size:0.9rem;">"${r.comment}"</p>
+                            <small style="color:#777;">— ${r.name}</small>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        function seedDefaultReviews() {
+            const defaultReviews = [
+                { name: 'Marcus T.', rating: '★★★★★', comment: 'The quality of the tech fleece tracksuit is top tier. Worth every naira!' },
+                { name: 'Sarah E.', rating: '★★★★★', comment: 'Fast delivery after OPay transfer verification. Absolute fire fit.' }
+            ];
+            defaultReviews.forEach(rev => {
+                db.collection("reviews").add(rev);
+            });
+        }
+
+        // Initialize Store Data
+        loadProducts();
+        loadReviews();
+    </script>
+</body>
+</html>
