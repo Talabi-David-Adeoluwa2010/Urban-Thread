@@ -67,6 +67,29 @@
             align-items: center;
             z-index: 9999;
             transition: opacity 1s ease-in-out;
+            overflow: hidden;
+        }
+
+        /* Floating background sewing emojis */
+        .floating-emoji {
+            position: absolute;
+            font-size: 1.2rem;
+            opacity: 0.25;
+            user-select: none;
+            pointer-events: none;
+            animation: floatEmoji 6s ease-in-out infinite;
+        }
+
+        @keyframes floatEmoji {
+            0% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(15deg);
+            }
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
         }
 
         .splash-logo-text {
@@ -75,6 +98,7 @@
             letter-spacing: 0.2em;
             color: #0f172a;
             margin-bottom: 10px;
+            z-index: 2;
         }
 
         .splash-sub {
@@ -83,6 +107,7 @@
             color: #64748b;
             text-transform: uppercase;
             margin-bottom: 30px;
+            z-index: 2;
         }
 
         .loader-bar {
@@ -91,6 +116,7 @@
             background: #e2e8f0;
             position: relative;
             overflow: hidden;
+            z-index: 2;
         }
 
         .loader-progress {
@@ -101,6 +127,17 @@
             width: 0%;
             background: var(--accent-blue);
             animation: loadProgress 4s linear forwards;
+        }
+
+        .splash-credits {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 0.65rem;
+            color: #64748b;
+            line-height: 1.4;
+            letter-spacing: 0.05em;
+            z-index: 2;
         }
 
         @keyframes loadProgress {
@@ -528,11 +565,21 @@
 
     <!-- CINEMATIC SPLASH SCREEN -->
     <div id="splash-screen">
+        <!-- Floating Background Stitching Emojis -->
+        <div class="floating-emoji" style="top: 10%; left: 15%; animation-delay: 0s;">🧵</div>
+        <div class="floating-emoji" style="top: 25%; left: 80%; animation-delay: 1.2s;">🪡</div>
+        <div class="floating-emoji" style="top: 70%; left: 10%; animation-delay: 2.4s;">🪡</div>
+        <div class="floating-emoji" style="top: 80%; left: 85%; animation-delay: 0.8s;">🧵</div>
+        <div class="floating-emoji" style="top: 45%; left: 5%; animation-delay: 3s;">🧵</div>
+        <div class="floating-emoji" style="top: 15%; left: 50%; animation-delay: 1.8s;">🪡</div>
+        <div class="floating-emoji" style="top: 65%; left: 75%; animation-delay: 2.1s;">🧵</div>
+
         <div class="splash-logo-text">URBAN THREAD</div>
         <div class="splash-sub">Forged in Creativity</div>
         <div class="loader-bar">
             <div class="loader-progress"></div>
         </div>
+        <div class="splash-credits">CEO: Mr Aluko & Mr Jesuloba Osayomi<br>Programmed by 🧑‍💻: Talabi David Adeoluwa</div>
     </div>
 
     <!-- MAIN STORE FRONT -->
