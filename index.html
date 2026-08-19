@@ -81,7 +81,7 @@
             padding: 20px;
         }
 
-        /* Floating background sewing emojis (Needles, Pins, Sewing Machines, Threads) */
+        /* Floating background sewing emojis */
         .floating-emoji {
             position: absolute;
             font-size: clamp(1rem, 2.5vw, 1.8rem);
@@ -92,15 +92,9 @@
         }
 
         @keyframes floatEmoji {
-            0% {
-                transform: translateY(0px) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-25px) rotate(20deg);
-            }
-            100% {
-                transform: translateY(0px) rotate(0deg);
-            }
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-25px) rotate(20deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
         }
 
         .splash-logo-img {
@@ -259,9 +253,9 @@
             color: #fff;
         }
 
-        /* Hero Banner - Fully Responsive Layout */
+        /* Hero Banner */
         .hero {
-            min-height: clamp(400px, 55vh, 600px);
+            min-height: clamp(350px, 45vh, 500px);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -304,6 +298,62 @@
             border-left: 3px solid var(--accent-gold);
             padding-left: 12px;
             color: #1b365d;
+        }
+
+        /* Dashboard Banner & AI Assistant Styles */
+        .dashboard-banner {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid var(--gray-border);
+            margin-bottom: 30px;
+            border-left: 5px solid var(--accent-gold);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .ai-assistant-card {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 12px;
+            margin-bottom: 12px;
+        }
+
+        .ai-btns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .ai-btns button {
+            background: var(--accent-blue);
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .ai-btns button:hover {
+            opacity: 0.9;
+        }
+
+        #ai-response-box {
+            font-style: italic;
+            font-size: 0.8rem;
+            color: #475569;
+            min-height: 20px;
+            margin-top: 5px;
+        }
+
+        .admin-contact-box {
+            font-size: 0.82rem;
+            color: #475569;
+            margin-top: 10px;
         }
 
         .product-grid {
@@ -432,7 +482,7 @@
             font-size: 0.9rem;
         }
 
-        /* Cart Drawer - Fully Responsive on Tablets/Laptops */
+        /* Cart Drawer */
         #cart-drawer {
             position: fixed;
             top: 0;
@@ -532,7 +582,7 @@
             border-radius: 4px;
         }
 
-        /* Modals (Auth & Checkout) Responsive Scaling */
+        /* Modals */
         #auth-modal, #checkout-modal, #admin-modal {
             display: none;
             position: fixed;
@@ -583,7 +633,7 @@
             gap: 12px;
         }
 
-        /* Admin Dashboard Responsive Table */
+        /* Admin Dashboard */
         #admin-dashboard {
             display: none;
             padding: clamp(20px, 4vw, 40px);
@@ -635,7 +685,6 @@
     <div class="page-wrapper">
         <!-- CINEMATIC SPLASH SCREEN -->
         <div id="splash-screen">
-            <!-- Floating Background Stitching Emojis -->
             <div class="floating-emoji" style="top: 8%; left: 12%; animation-delay: 0s;">🧵</div>
             <div class="floating-emoji" style="top: 18%; left: 82%; animation-delay: 1.2s;">🪡</div>
             <div class="floating-emoji" style="top: 75%; left: 8%; animation-delay: 2.4s;">📍</div>
@@ -646,7 +695,6 @@
             <div class="floating-emoji" style="top: 35%; left: 92%; animation-delay: 0.5s;">🧵</div>
             <div class="floating-emoji" style="top: 88%; left: 45%; animation-delay: 1.5s;">📍</div>
 
-            <!-- Custom User Logo Inserted -->
             <img src="https://i.ibb.co/6R22727/IMG-20260219-WA0001.jpg" class="splash-logo-img" alt="Urban Thread Logo" crossorigin="anonymous">
             
             <div class="splash-logo-text">URBAN THREAD</div>
@@ -663,7 +711,6 @@
         <div id="main-store">
             <header>
                 <a class="brand-logo-container" ondblclick="openAdminModalDirect()">
-                    <!-- Fixed missing/invisible top-left header logo with explicit dimensions & inline fallback styles -->
                     <img src="https://i.ibb.co/6R22727/IMG-20260219-WA0001.jpg" class="header-logo-img" alt="Logo" crossorigin="anonymous">
                     <span class="logo-text">URBAN THREAD</span>
                 </a>
@@ -683,7 +730,28 @@
                     <p>Built Different. Made to Last.</p>
                 </section>
 
-                <div class="container" id="catalog">
+                <div class="container">
+                    <!-- Dashboard Greeting, AI Assistant & Admin Contact -->
+                    <div class="dashboard-banner">
+                        <h2 id="user-greeting" style="color: #1b365d; font-size: 1.15rem; margin-bottom: 12px;">Hi, @guest</h2>
+                        
+                        <!-- AI Assistant Card -->
+                        <div class="ai-assistant-card">
+                            <h3 style="font-size: 0.9rem; color: #1b365d; margin-bottom: 6px;">🤖 Help / AI Assistant</h3>
+                            <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 8px;">Tap a quick question below for instant answers:</p>
+                            <div class="ai-btns">
+                                <button onclick="aiAnswer('navigate')">How to navigate</button>
+                                <button onclick="aiAnswer('order')">How to order</button>
+                            </div>
+                            <div id="ai-response-box">Select a question above to get instant help.</div>
+                        </div>
+
+                        <!-- Admin Contact -->
+                        <div class="admin-contact-box">
+                            <p>⚠️ Having issues or errors? Contact Admin: <strong>08024300891</strong></p>
+                        </div>
+                    </div>
+
                     <h2 class="section-title">Latest Drops</h2>
                     <div class="product-grid" id="product-grid-container"></div>
                 </div>
@@ -730,7 +798,7 @@
             <button class="checkout-btn" onclick="openCheckoutForm()">Proceed to Secure Checkout</button>
         </div>
 
-        <!-- AUTH MODAL (LOGIN / SIGNUP) -->
+        <!-- AUTH MODAL -->
         <div id="auth-modal">
             <div class="modal-box">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
@@ -856,21 +924,39 @@
         let currentUser = null;
         let isSignUpMode = false;
 
-        // Firebase Auth State Observer (Persistent across refreshes & devices)
+        // Firebase Auth State Observer
         auth.onAuthStateChanged((user) => {
             currentUser = user;
             const authBtn = document.getElementById('auth-btn-label');
             const ordersNav = document.getElementById('nav-orders');
+            const greetingEl = document.getElementById('user-greeting');
 
             if (user) {
                 authBtn.innerText = 'Logout';
                 ordersNav.style.display = 'block';
+                if (user.email) {
+                    const username = user.email.split('@')[0];
+                    greetingEl.innerText = `Hi, @${username}`;
+                } else {
+                    greetingEl.innerText = `Hi, @user`;
+                }
                 loadMyOrders();
             } else {
                 authBtn.innerText = 'Sign In';
                 ordersNav.style.display = 'none';
+                greetingEl.innerText = 'Hi, @guest';
             }
         });
+
+        // AI Assistant Instant Answer Handler
+        function aiAnswer(type) {
+            const box = document.getElementById('ai-response-box');
+            if (type === 'navigate') {
+                box.innerText = "💡 Use the top menu links (Collection, Reviews, Cart) to browse products and manage your selections across pages easily.";
+            } else if (type === 'order') {
+                box.innerText = "💡 Select your preferred size on any item, click 'Add to Cart', head to your cart, and fill out your delivery details to complete an order.";
+            }
+        }
 
         function handleAuthClick() {
             if (currentUser) {
@@ -912,27 +998,26 @@
 
             if (isSignUpMode) {
                 auth.createUserWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
+                    .then(() => {
                         alert('Account created successfully!');
                         closeAuthModal();
                     })
                     .catch((error) => {
-                        // Fixed Firebase Auth configuration error handling by initializing Email/Password provider correctly if not enabled on console
                         if (error.code === 'auth/configuration-not-found') {
-                            alert('Firebase Auth Configuration Error: Please ensure Email/Password sign-in provider is enabled in your Firebase Console (Authentication -> Sign-in method tab).');
+                            alert('Firebase Auth Configuration Error: Please ensure Email/Password sign-in provider is enabled in your Firebase Console.');
                         } else {
                             alert('Sign Up Error: ' + error.message);
                         }
                     });
             } else {
                 auth.signInWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
+                    .then(() => {
                         alert('Signed in successfully!');
                         closeAuthModal();
                     })
                     .catch((error) => {
                         if (error.code === 'auth/configuration-not-found') {
-                            alert('Firebase Auth Configuration Error: Please ensure Email/Password sign-in provider is enabled in your Firebase Console (Authentication -> Sign-in method tab).');
+                            alert('Firebase Auth Configuration Error: Please ensure Email/Password sign-in provider is enabled in your Firebase Console.');
                         } else {
                             alert('Sign In Error: ' + error.message);
                         }
