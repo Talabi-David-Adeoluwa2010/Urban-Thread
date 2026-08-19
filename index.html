@@ -316,8 +316,8 @@
         #cart-drawer {
             position: fixed;
             top: 0;
-            right: -420px;
-            width: 400px;
+            right: -450px;
+            width: 420px;
             height: 100vh;
             background: #ffffff;
             border-left: 1px solid var(--gray-border);
@@ -325,7 +325,7 @@
             transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             flex-direction: column;
-            padding: 30px;
+            padding: 25px;
             box-shadow: -10px 0 30px rgba(0,0,0,0.05);
         }
 
@@ -339,7 +339,7 @@
             align-items: center;
             border-bottom: 1px solid var(--gray-border);
             padding-bottom: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .close-cart {
@@ -353,15 +353,46 @@
         .cart-items {
             flex-grow: 1;
             overflow-y: auto;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .cart-item {
             display: flex;
-            justify-content: space-between;
+            gap: 15px;
             margin-bottom: 15px;
             border-bottom: 1px solid #f1f5f9;
             padding-bottom: 15px;
+            align-items: center;
+        }
+
+        .cart-item-img {
+            width: 70px;
+            height: 80px;
+            object-fit: cover;
+            background: #f1f5f9;
+            border: 1px solid var(--gray-border);
+        }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .qty-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .cart-summary {
+            border-top: 1px solid var(--gray-border);
+            padding-top: 15px;
+            margin-bottom: 15px;
         }
 
         .checkout-btn {
@@ -374,6 +405,58 @@
             text-transform: uppercase;
             letter-spacing: 0.1em;
             cursor: pointer;
+        }
+
+        /* Modern Checkout Form Modal */
+        #checkout-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .checkout-box {
+            background: #ffffff;
+            border: 1px solid var(--gray-border);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 5px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
         }
 
         /* Secret Admin Backdoor Modal */
@@ -488,11 +571,8 @@
 
         <div class="container" id="catalog">
             <h2 class="section-title">Latest Drops</h2>
-            <div class="product-grid" id="product-grid-container">
-                <!-- Dynamically Injected Products -->
-            </div>
+            <div class="product-grid" id="product-grid-container"></div>
 
-            <!-- GLOBAL REVIEWS SECTION -->
             <div class="reviews-section" id="reviews-section">
                 <h2 class="section-title">Global Community Feedback</h2>
                 <div id="reviews-feed"></div>
@@ -503,11 +583,62 @@
     <!-- CART DRAWER -->
     <div id="cart-drawer">
         <div class="cart-header">
-            <h3>Your Bag</h3>
+            <h3>Your Shopping Cart</h3>
             <button class="close-cart" onclick="toggleCart()">&times;</button>
         </div>
         <div class="cart-items" id="cart-items-container"></div>
-        <button class="checkout-btn" onclick="proceedCheckout()">Proceed to Checkout (OPay Transfer)</button>
+        <div class="cart-summary">
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-weight:600;">
+                <span>Subtotal:</span>
+                <span id="cart-subtotal" style="color:var(--accent-blue);">₦0</span>
+            </div>
+        </div>
+        <button class="checkout-btn" onclick="openCheckoutForm()">Proceed to Secure Checkout</button>
+    </div>
+
+    <!-- CHECKOUT FORM MODAL -->
+    <div id="checkout-modal">
+        <div class="checkout-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3>Checkout & Delivery</h3>
+                <button onclick="closeCheckoutForm()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+            <p style="color:#64748b; font-size:0.8rem; margin-bottom:20px;">Provide your accurate delivery information for fulfillment.</p>
+            
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="chk-name" placeholder="Enter your full name">
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="chk-email" placeholder="name@example.com">
+            </div>
+            <div class="form-group">
+                <label>Phone Number (for delivery rider)</label>
+                <input type="tel" id="chk-phone" placeholder="08012345678">
+            </div>
+            <div class="form-group">
+                <label>Street Address</label>
+                <input type="text" id="chk-address" placeholder="House number and street name">
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex:1;">
+                    <label>City</label>
+                    <input type="text" id="chk-city" placeholder="City">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>State / Province</label>
+                    <input type="text" id="chk-state" placeholder="State">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Select Payment Method:</label>
+                <select id="chk-payment">
+                    <option value="Bank Transfer">Direct Bank Transfer (OPay)</option>
+                </select>
+            </div>
+            <button class="btn-add-cart" onclick="submitOrder()" style="margin-top:10px;">Complete Order</button>
+        </div>
     </div>
 
     <!-- SECRET ADMIN BACKDOOR MODAL -->
@@ -524,7 +655,7 @@
     <!-- SECRET ADMIN DASHBOARD VIEW -->
     <div id="admin-dashboard">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <h2>Admin Control Center — OPay Verification & Sync</h2>
+            <h2>Admin Control Center — Bank Transfer Verification & Sync</h2>
             <button class="btn-auth" onclick="logoutAdmin()">Logout</button>
         </div>
         
@@ -534,7 +665,8 @@
                 <tr>
                     <th>Order ID</th>
                     <th>Customer Details</th>
-                    <th>Selected Items & Sizes</th>
+                    <th>Delivery Address</th>
+                    <th>Items & Sizes</th>
                     <th>Total</th>
                     <th>Payment Status</th>
                     <th>Manual Verification Action</th>
@@ -545,7 +677,6 @@
     </div>
 
     <script>
-        // --- AUTO-LOAD TRANSITION ---
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             const store = document.getElementById('main-store');
@@ -560,7 +691,6 @@
         let cart = [];
         let selectedSizes = {};
 
-        // --- FETCH PRODUCTS FROM FIRESTORE ---
         function loadProducts() {
             db.collection("products").onSnapshot((snapshot) => {
                 const grid = document.getElementById('product-grid-container');
@@ -619,9 +749,14 @@
                 alert('Please select a size (XS to XXL) before adding to cart.');
                 return;
             }
-            cart.push({ id: productId, name, price, image, selectedSize: chosenSize });
-            document.getElementById('cart-count').innerText = cart.length;
-            renderCartItems();
+            
+            let existingItem = cart.find(item => item.id === productId && item.selectedSize === chosenSize);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ id: productId, name, price, image, selectedSize: chosenSize, quantity: 1 });
+            }
+            updateCartUI();
             toggleCart();
         }
 
@@ -629,61 +764,99 @@
             document.getElementById('cart-drawer').classList.toggle('open');
         }
 
-        function renderCartItems() {
-            const container = document.getElementById('cart-items-container');
-            container.innerHTML = '';
-            cart.forEach((item, index) => {
-                container.innerHTML += `
-                    <div class="cart-item">
-                        <div>
-                            <h4>${item.name}</h4>
-                            <p style="color:#64748b; font-size:0.75rem;">Size: ${item.selectedSize}</p>
-                            <p style="color:var(--accent-blue);">${item.price}</p>
-                        </div>
-                        <button onclick="removeFromCart(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:0.8rem;">Remove</button>
-                    </div>
-                `;
-            });
+        function updateQuantity(index, change) {
+            cart[index].quantity += change;
+            if (cart[index].quantity <= 0) {
+                cart.splice(index, 1);
+            }
+            updateCartUI();
         }
 
         function removeFromCart(index) {
             cart.splice(index, 1);
-            document.getElementById('cart-count').innerText = cart.length;
-            renderCartItems();
+            updateCartUI();
         }
 
-        // --- CHECKOUT ---
-        function proceedCheckout() {
+        function updateCartUI() {
+            let totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cart-count').innerText = totalCount;
+
+            const container = document.getElementById('cart-items-container');
+            container.innerHTML = '';
+            
+            let subtotal = 0;
+
+            cart.forEach((item, index) => {
+                let itemPriceNum = parseInt(item.price.replace(/[^\d]/g, ''));
+                subtotal += itemPriceNum * item.quantity;
+
+                container.innerHTML += `
+                    <div class="cart-item">
+                        <img src="${item.image}" class="cart-item-img" alt="${item.name}">
+                        <div style="flex-grow:1;">
+                            <h4 style="font-size:0.85rem; margin-bottom:30px;">${item.name}</h4>
+                            <p style="color:#64748b; font-size:0.7rem; margin-bottom:30px;">Size: ${item.selectedSize}</p>
+                            <p style="color:var(--accent-blue); font-size:0.85rem; font-weight:600; margin-bottom:30px;">${item.price}</p>
+                            <div class="qty-control">
+                                <button class="qty-btn" onclick="updateQuantity(${index}, -1)">-</button>
+                                <span style="font-size:0.85rem; font-weight:bold;">${item.quantity}</span>
+                                <button class="qty-btn" onclick="updateQuantity(${index}, 1)">+</button>
+                            </div>
+                        </div>
+                        <button onclick="removeFromCart(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:0.75rem;">Remove</button>
+                    </div>
+                `;
+            });
+
+            document.getElementById('cart-subtotal').innerText = '₦' + subtotal.toLocaleString();
+        }
+
+        function openCheckoutForm() {
             if (cart.length === 0) {
-                alert('Your bag is empty.');
+                alert('Your shopping cart is empty.');
                 return;
             }
-            let customerName = prompt('Enter your Full Name for delivery:');
-            let customerEmail = prompt('Enter your Email Address for tracking receipts:');
-            let customerPhone = prompt('Enter your Phone Number:');
+            toggleCart();
+            document.getElementById('checkout-modal').style.display = 'flex';
+        }
 
-            if (!customerName || !customerEmail) return;
+        function closeCheckoutForm() {
+            document.getElementById('checkout-modal').style.display = 'none';
+        }
+
+        function submitOrder() {
+            let name = document.getElementById('chk-name').value;
+            let email = document.getElementById('chk-email').value;
+            let phone = document.getElementById('chk-phone').value;
+            let address = document.getElementById('chk-address').value;
+            let city = document.getElementById('chk-city').value;
+            let state = document.getElementById('chk-state').value;
+
+            if (!name || !email || !phone || !address) {
+                alert('Please fill in all required delivery fields.');
+                return;
+            }
 
             let orderId = 'UT-' + Math.floor(100000 + Math.random() * 900000);
-            let totalAmount = cart.reduce((sum, item) => sum + parseInt(item.price.replace(/[^\d]/g, '')), 0);
+            let totalAmount = cart.reduce((sum, item) => sum + (parseInt(item.price.replace(/[^\d]/g, '')) * item.quantity), 0);
 
             let newOrder = {
                 id: orderId,
-                name: customerName,
-                email: customerEmail,
-                phone: customerPhone,
-                items: cart.map(c => `${c.name} [Size: ${c.selectedSize}]`).join(', '),
+                name: name,
+                email: email,
+                phone: phone,
+                address: `${address}, ${city}, ${state}`,
+                items: cart.map(c => `${c.name} [Size: ${c.selectedSize}] (Qty: ${c.quantity})`).join(', '),
                 total: '₦' + totalAmount.toLocaleString(),
-                status: 'Pending OPay Verification',
+                status: 'Pending Bank Transfer Verification',
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
 
             db.collection("orders").add(newOrder).then(() => {
                 alert(`Order Placed Successfully!\n\nPlease transfer total (${newOrder.total}) to our OPay Account:\nAccount Number: 9012345678\nAccount Name: Urban Thread Ltd\n\nOrder ID: ${orderId}`);
+                closeCheckoutForm();
                 cart = [];
-                document.getElementById('cart-count').innerText = 0;
-                toggleCart();
-                renderCartItems();
+                updateCartUI();
             }).catch(error => {
                 alert("Error placing order: " + error.message);
             });
@@ -728,7 +901,8 @@
                     tbody.innerHTML += `
                         <tr>
                             <td>${ord.id}</td>
-                            <td>${ord.name}<br><small style="color:#64748b;">${ord.email}</small></td>
+                            <td>${ord.name}<br><small style="color:#64748b;">${ord.email}<br>${ord.phone}</small></td>
+                            <td>${ord.address || 'N/A'}</td>
                             <td>${ord.items}</td>
                             <td>${ord.total}</td>
                             <td style="color: ${isSuccessful ? '#16a34a' : '#f59e0b'}; font-weight:bold;">${ord.status}</td>
@@ -785,7 +959,7 @@
         function seedDefaultReviews() {
             const defaultReviews = [
                 { name: 'Marcus T.', rating: '★★★★★', comment: 'The quality of the tech fleece tracksuit is top tier.' },
-                { name: 'Sarah E.', rating: '★★★★★', comment: 'Fast delivery after OPay transfer verification.' }
+                { name: 'Sarah E.', rating: '★★★★★', comment: 'Fast delivery after bank transfer verification.' }
             ];
             defaultReviews.forEach(rev => {
                 db.collection("reviews").add(rev);
