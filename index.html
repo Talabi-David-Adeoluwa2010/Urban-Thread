@@ -29,7 +29,6 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // Enable IndexedDB Local Persistence for Instant Loading & Offline Support
         db.enablePersistence().catch((err) => {
             if (err.code == 'failed-precondition') {
                 console.log('Persistence failed: Multiple tabs open');
@@ -665,7 +664,7 @@
             margin-bottom: 10px;
         }
 
-        #auth-modal, #checkout-modal, #payment-continuation-modal, #admin-modal {
+        #auth-modal, #checkout-modal, #payment-continuation-modal, #success-status-modal, #admin-modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -825,6 +824,72 @@
         .pay-footer-note a {
             color: #2563eb;
             text-decoration: underline;
+        }
+
+        /* --- STYLING FOR NEW PENDING SUCCESS NOTIFICATION MODAL --- */
+        .success-modal-box {
+            background: #ffffff;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 440px;
+            padding: 30px 25px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            border-top: 6px solid var(--accent-gold);
+        }
+
+        .success-icon-wrap {
+            width: 65px;
+            height: 65px;
+            background: #fef3c7;
+            color: #d97706;
+            font-size: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 18px auto;
+            border: 2px solid #fde68a;
+        }
+
+        .success-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #1b365d;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .success-message-body {
+            font-size: 0.9rem;
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 22px;
+        }
+
+        .success-message-body strong {
+            color: #1b365d;
+        }
+
+        .btn-continue-orders {
+            width: 100%;
+            background: var(--accent-blue);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(27, 54, 93, 0.3);
+            transition: opacity 0.2s;
+        }
+
+        .btn-continue-orders:hover {
+            opacity: 0.9;
         }
 
         .form-group {
@@ -1151,6 +1216,19 @@
                         Email address: <a href="mailto:urbanthread@gmail.com">urbanthread@gmail.com</a>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- NEW PENDING SUCCESS NOTIFICATION MODAL -->
+        <div id="success-status-modal">
+            <div class="success-modal-box">
+                <div class="success-icon-wrap">⏳</div>
+                <div class="success-title">Your order payment is pending</div>
+                <div class="success-message-body">
+                    Thanks for shopping at Urban Thread!<br><br>
+                    Check your order on your dashboard to see if the payment has been confirmed and track your order.
+                </div>
+                <button class="btn-continue-orders" onclick="redirectToOrdersTab()">Continue to Orders</button>
             </div>
         </div>
 
@@ -1517,7 +1595,6 @@
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            // FIX: Explicitly hide the checkout modal completely so it doesn't block clicks underneath
             document.getElementById('checkout-modal').style.display = 'none';
             document.getElementById('pay-modal-amount').innerText = formattedTotal;
             document.getElementById('payment-continuation-modal').style.display = 'flex';
@@ -1543,15 +1620,20 @@
             if (!pendingOrderData) return;
 
             db.collection("orders").add(pendingOrderData).then(() => {
-                alert(`Order Submitted Successfully!\n\nOrder ID: ${pendingOrderData.id}\nYour order status is now set to 'Pending Bank Transfer Verification'. You can track it anytime under 'My Orders'.`);
                 closePaymentContinuation();
-                cart = [];
-                updateCartUI();
-                pendingOrderData = null;
-                switchPage('orders');
+                // Show the new styled Pending Success Modal instead of an alert box
+                document.getElementById('success-status-modal').style.display = 'flex';
             }).catch(error => {
                 alert("Error saving order: " + error.message);
             });
+        }
+
+        function redirectToOrdersTab() {
+            document.getElementById('success-status-modal').style.display = 'none';
+            cart = [];
+            updateCartUI();
+            pendingOrderData = null;
+            switchPage('orders');
         }
 
         function loadMyOrders() {
