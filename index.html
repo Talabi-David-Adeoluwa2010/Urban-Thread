@@ -30,11 +30,7 @@
         const auth = firebase.auth();
 
         db.enablePersistence().catch((err) => {
-            if (err.code == 'failed-precondition') {
-                console.log('Persistence failed: Multiple tabs open');
-            } else if (err.code == 'unimplemented') {
-                console.log('Persistence is not supported by this browser');
-            }
+            console.log('Persistence note: ', err.code);
         });
     </script>
     <style>
@@ -1683,7 +1679,7 @@
                     let escapedImages = JSON.stringify(imagesList).replace(/"/g, '&quot;');
 
                     p.sizes.forEach((sz, idx) => {
-                        let isAvailable = p.stockStatus[idx];
+                        let isAvailable = p.stockStatus ? p.stockStatus[idx] : true;
                         sizeButtons += `<button class="size-btn ${isAvailable ? '' : 'out-of-stock'}" onclick="selectSize('${pId}', '${sz}', this)">${sz}</button>`;
                     });
 
@@ -1881,21 +1877,19 @@
                 btn.style.cursor = 'not-allowed';
             }
 
-            setTimeout(() => {
-                db.collection("orders").add(pendingOrderData).then(() => {
-                    closePaymentContinuation();
-                    document.getElementById('success-status-modal').style.display = 'flex';
-                }).catch(error => {
-                    alert("Error saving order (Check Firebase Rules): " + error.message);
-                    isSubmittingOrder = false;
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.innerText = 'I have made the payment';
-                        btn.style.opacity = '1';
-                        btn.style.cursor = 'pointer';
-                    }
-                });
-            }, 6000);
+            db.collection("orders").add(pendingOrderData).then(() => {
+                closePaymentContinuation();
+                document.getElementById('success-status-modal').style.display = 'flex';
+            }).catch(error => {
+                alert("Error saving order: " + error.message);
+                isSubmittingOrder = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = 'I have made the payment';
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                }
+            });
         }
 
         function redirectToOrdersTab() {
@@ -2047,7 +2041,7 @@
         }
 
         // --- DYNAMIC IMAGE COMPRESSION FUNCTION (Forces file size below 1MB) ---
-        function compressImage(file, maxMb = 1.0) {
+        function compressImage(file, maxMb = 0.8) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -2059,37 +2053,33 @@
                         let width = img.width;
                         let height = img.height;
                         
-                        // Start with initial dimensions
+                        let maxDimension = 1000;
+                        if (width > maxDimension || height > maxDimension) {
+                            if (width > height) {
+                                height = Math.round((height *= maxDimension / width));
+                                width = maxDimension;
+                            } else {
+                                width = Math.round((width *= maxDimension / height));
+                                height = maxDimension;
+                            }
+                        }
+
                         canvas.width = width;
                         canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        let quality = 0.9;
+                        let quality = 0.85;
                         let dataUrl = canvas.toDataURL('image/jpeg', quality);
                         
-                        // Function to calculate base64 string size in bytes
                         const getBase64Size = (b64) => {
                             let stringLength = b64.length - (b64.indexOf(',') + 1);
                             return 4 * Math.ceil(stringLength / 3) * 0.562489635538;
                         };
 
-                        // Iteratively reduce quality or scale down if it exceeds maxMb
                         let maxBytes = maxMb * 1024 * 1024;
-                        while (getBase64Size(dataUrl) > maxBytes && quality > 0.1) {
+                        while (getBase64Size(dataUrl) > maxBytes && quality > 0.2) {
                             quality -= 0.1;
                             dataUrl = canvas.toDataURL('image/jpeg', quality);
-                        }
-
-                        // If lowering quality wasn't enough, aggressively scale dimensions down
-                        let scaleFactor = 0.9;
-                        while (getBase64Size(dataUrl) > maxBytes && width > 200) {
-                            width = Math.floor(width * scaleFactor);
-                            height = Math.floor(height * scaleFactor);
-                            canvas.width = width;
-                            canvas.height = height;
-                            ctx.clearRect(0, 0, width, height);
-                            ctx.drawImage(img, 0, 0, width, height);
-                            dataUrl = canvas.toDataURL('image/jpeg', 0.7);
                         }
 
                         resolve(dataUrl);
@@ -2129,11 +2119,11 @@
                 return;
             }
 
-            alert('Compressing and preparing images to fit under 1MB limit. Please wait...');
+            alert('Compressing images. Please wait a moment...');
 
             let imagesArray = [];
             for (let i = 0; i < fileInput.files.length; i++) {
-                let compressedDataUrl = await compressImage(fileInput.files[i], 1.0);
+                let compressedDataUrl = await compressImage(fileInput.files[i], 0.6);
                 imagesArray.push(compressedDataUrl);
             }
 
@@ -2151,14 +2141,14 @@
                 stockStatus,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
-                alert('Product published with compressed images successfully!');
+                alert('Product published successfully!');
                 closeAddProductModal();
                 document.getElementById('new-prod-name').value = '';
                 document.getElementById('new-prod-price').value = '';
                 document.getElementById('new-prod-desc').value = '';
                 document.getElementById('new-prod-img-files').value = '';
             }).catch(error => {
-                alert('Sync Error publishing product (Check Firebase Rules): ' + error.message);
+                alert('Sync Error publishing product: ' + error.message);
             });
         }
 
@@ -2183,8 +2173,9 @@
                         thumbsHtml += `<img src="${imgUrl}" style="width:35px; height:40px; object-fit:cover; border-radius:3px; margin-right:3px;" alt="thumb">`;
                     });
 
-                    p.sizes.forEach((sz, idx) => {
-                        let isAvailable = p.stockStatus[idx];
+                    let productSizes = p.sizes || ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+                    productSizes.forEach((sz, idx) => {
+                        let isAvailable = p.stockStatus ? p.stockStatus[idx] : true;
                         sizeTogglesHtml += `<button onclick="toggleProductStock('${pId}', ${idx}, ${!isAvailable})" class="btn-approve" style="background:${isAvailable ? '#16a34a' : '#dc2626'}; margin-right:4px; margin-bottom:4px;">${sz}: ${isAvailable ? 'In Stock' : 'Out of Stock'}</button>`;
                     });
 
@@ -2209,10 +2200,12 @@
             db.collection("products").doc(productId).get().then((doc) => {
                 if (doc.exists) {
                     let data = doc.data();
-                    let updatedStock = [...data.stockStatus];
-                    updatedStock[sizeIndex] = newStatus;
+                    let currentStock = data.stockStatus || new Array(data.sizes.length).fill(true);
+                    currentStock[sizeIndex] = newStatus;
                     db.collection("products").doc(productId).update({
-                        stockStatus: updatedStock
+                        stockStatus: currentStock
+                    }).then(() => {
+                        console.log("Stock updated successfully.");
                     }).catch(error => {
                         alert('Sync Error updating stock: ' + error.message);
                     });
@@ -2227,7 +2220,7 @@
                 db.collection("products").doc(productId).delete().then(() => {
                     alert('Product deleted globally.');
                 }).catch(error => {
-                    alert('Sync Error deleting product (Check Firebase Rules): ' + error.message);
+                    alert('Sync Error deleting product: ' + error.message);
                 });
             }
         }
@@ -2285,7 +2278,7 @@
                     order_items: items,
                     order_total: total
                 }).then(() => {
-                    alert(`Payment verified for ${name}! Status updated to Received & Dispatched and email receipt sent.`);
+                    alert(`Payment verified for ${name}! Status updated and email receipt sent.`);
                 }, (error) => {
                     alert('Status updated in Firestore, but email failed: ' + JSON.stringify(error));
                 });
@@ -2298,9 +2291,9 @@
             db.collection("orders").doc(docId).update({
                 status: 'Delivered 📦'
             }).then(() => {
-                alert('Order marked as Delivered successfully! Customers can now see it on their dashboard.');
+                alert('Order marked as Delivered successfully!');
             }).catch(error => {
-                alert('Sync Error updating status (Check Firebase Rules): ' + error.message);
+                alert('Sync Error updating status: ' + error.message);
             });
         }
 
