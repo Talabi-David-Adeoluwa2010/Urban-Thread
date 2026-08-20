@@ -1381,7 +1381,7 @@
                         closeAuthModal();
                     })
                     .catch((error) => {
-                        alert('Invalid email or password.');
+                        alert('Invalid details or email already in use.');
                     });
             } else {
                 auth.signInWithEmailAndPassword(email, password)
@@ -1623,7 +1623,7 @@
 
         function finalizeOrderCompletion() {
             if (!pendingOrderData) {
-                alert('No active order data found. Please complete the checkout form first.');
+                alert('No order data found. Please try checking out again.');
                 return;
             }
 
