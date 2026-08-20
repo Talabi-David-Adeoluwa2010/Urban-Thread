@@ -688,7 +688,6 @@
             padding: 15px;
         }
 
-        /* --- FULLY FIT MODALS (NO SWIPE DOWN REQUIRED) --- */
         .pay-modal-box {
             background: #ffffff;
             border-radius: 12px;
@@ -834,7 +833,6 @@
             text-decoration: underline;
         }
 
-        /* --- PENDING STATUS MODAL STYLING --- */
         .status-badge-pill {
             display: inline-block;
             background: #fef3c7;
@@ -1078,7 +1076,7 @@
 <body>
 
     <div class="page-wrapper">
-        <!-- CINEMATIC SPLASH SCREEN WITH 100 FLOATING EMOJIS -->
+        <!-- CINEMATIC SPLASH SCREEN -->
         <div id="splash-screen">
             <script>
                 const emojis = ['🧵', '🪡', '📍'];
@@ -1578,7 +1576,7 @@
                         closeAuthModal();
                     })
                     .catch((error) => {
-                        alert('Invalid details or email already in use.');
+                        alert('Invalid details or email already in use: ' + error.message);
                     });
             } else {
                 auth.signInWithEmailAndPassword(email, password)
@@ -1587,7 +1585,7 @@
                         closeAuthModal();
                     })
                     .catch((error) => {
-                        alert('Invalid email or password.');
+                        alert('Invalid email or password: ' + error.message);
                     });
             }
         }
@@ -1700,6 +1698,8 @@
                         </div>
                     `;
                 });
+            }, (error) => {
+                console.error("Error loading products: ", error);
             });
         }
 
@@ -1709,7 +1709,7 @@
                 { name: 'Britain Edition Tech Tracksuit', price: '₦95,000', description: 'Weather resistant street fashion fit.', images: ['https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&auto=format&fit=crop&q=60', 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=500&auto=format&fit=crop&q=60', 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=500&auto=format&fit=crop&q=60'], sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, true, false, true, true] }
             ];
             defaultProducts.forEach(prod => {
-                db.collection("products").add(prod);
+                db.collection("products").add(prod).catch(err => console.error("Error seeding product: ", err));
             });
         }
 
@@ -1885,13 +1885,12 @@
                 btn.style.cursor = 'not-allowed';
             }
 
-            // Syncing order for 6 seconds as requested, then open the pending modal
             setTimeout(() => {
                 db.collection("orders").add(pendingOrderData).then(() => {
                     closePaymentContinuation();
                     document.getElementById('success-status-modal').style.display = 'flex';
                 }).catch(error => {
-                    alert("Error saving order: " + error.message);
+                    alert("Error saving order (Check Firebase Rules): " + error.message);
                     isSubmittingOrder = false;
                     if (btn) {
                         btn.disabled = false;
@@ -1946,6 +1945,8 @@
                         </div>
                     `;
                 });
+            }, (error) => {
+                console.error("Error loading orders: ", error);
             });
         }
 
@@ -1969,6 +1970,8 @@
                         </div>
                     `;
                 });
+            }, (error) => {
+                console.error("Error loading reviews: ", error);
             });
         }
 
@@ -1991,6 +1994,8 @@
                 alert('Review posted successfully!');
                 document.getElementById('rev-name').value = '';
                 document.getElementById('rev-comment').value = '';
+            }).catch(error => {
+                alert('Error posting review: ' + error.message);
             });
         }
 
@@ -2000,7 +2005,7 @@
                 { name: 'Sarah E.', rating: '★★★★★', comment: 'Fast delivery after bank transfer verification.' }
             ];
             defaultReviews.forEach(rev => {
-                db.collection("reviews").add(rev);
+                db.collection("reviews").add(rev).catch(err => console.error("Error seeding review: ", err));
             });
         }
 
@@ -2102,7 +2107,7 @@
                 document.getElementById('new-prod-desc').value = '';
                 document.getElementById('new-prod-img-files').value = '';
             }).catch(error => {
-                alert('Error publishing product: ' + error.message);
+                alert('Sync Error publishing product (Check Firebase Rules): ' + error.message);
             });
         }
 
@@ -2144,6 +2149,8 @@
                         </tr>
                     `;
                 });
+            }, (error) => {
+                console.error("Error loading admin products: ", error);
             });
         }
 
@@ -2155,17 +2162,21 @@
                     updatedStock[sizeIndex] = newStatus;
                     db.collection("products").doc(productId).update({
                         stockStatus: updatedStock
+                    }).catch(error => {
+                        alert('Sync Error updating stock: ' + error.message);
                     });
                 }
+            }).catch(error => {
+                alert('Error fetching product for stock update: ' + error.message);
             });
         }
 
         function deleteProduct(productId) {
             if (confirm('Are you sure you want to permanently delete this product from the store?')) {
                 db.collection("products").doc(productId).delete().then(() => {
-                    alert('Product deleted successfully.');
+                    alert('Product deleted globally.');
                 }).catch(error => {
-                    alert('Error deleting product: ' + error.message);
+                    alert('Sync Error deleting product (Check Firebase Rules): ' + error.message);
                 });
             }
         }
@@ -2207,6 +2218,8 @@
                         </tr>
                     `;
                 });
+            }, (error) => {
+                console.error("Error loading admin orders: ", error);
             });
         }
 
@@ -2225,6 +2238,8 @@
                 }, (error) => {
                     alert('Status updated in Firestore, but email failed: ' + JSON.stringify(error));
                 });
+            }).catch(error => {
+                alert('Sync Error approving payment: ' + error.message);
             });
         }
 
@@ -2234,7 +2249,7 @@
             }).then(() => {
                 alert('Order marked as Delivered successfully! Customers can now see it on their dashboard.');
             }).catch(error => {
-                alert('Error updating status: ' + error.message);
+                alert('Sync Error updating status (Check Firebase Rules): ' + error.message);
             });
         }
 
