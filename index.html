@@ -114,7 +114,6 @@
             width: 100%;
         }
 
-        /* Updated to be big, square, and full width */
         .splash-logo-img {
             width: 92vw;
             height: 92vw;
@@ -666,7 +665,7 @@
             margin-bottom: 10px;
         }
 
-        #auth-modal, #checkout-modal, #admin-modal {
+        #auth-modal, #checkout-modal, #payment-continuation-modal, #admin-modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -686,6 +685,146 @@
             max-width: 450px;
             border-radius: 8px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        /* --- STYLING FOR PAYMENT CONTINUATION MODAL (MATCHING REFERENCE IMAGE) --- */
+        .pay-modal-box {
+            background: #ffffff;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .pay-banner {
+            background: linear-gradient(135deg, #1b365d 0%, #2563eb 100%);
+            color: #ffffff;
+            padding: 25px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .pay-banner-close {
+            position: absolute;
+            top: 15px;
+            right: 18px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.6rem;
+            cursor: pointer;
+        }
+
+        .pay-banner-title {
+            font-size: 1.1rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .pay-banner-amount {
+            font-size: clamp(1.8rem, 4vw, 2.3rem);
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            margin-bottom: 10px;
+        }
+
+        .pay-banner-subtitle {
+            font-size: 0.78rem;
+            opacity: 0.85;
+            letter-spacing: 0.03em;
+        }
+
+        .pay-body {
+            padding: 20px;
+        }
+
+        .pay-warning-text {
+            color: #dc2626;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 18px;
+            line-height: 1.4;
+        }
+
+        .pay-card-field {
+            background: #f0f4f8;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .pay-field-info label {
+            display: block;
+            font-size: 0.7rem;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 3px;
+            letter-spacing: 0.05em;
+        }
+
+        .pay-field-value {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #1b365d;
+        }
+
+        .copy-btn {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-made-payment {
+            width: 100%;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-made-payment:hover {
+            opacity: 0.9;
+        }
+
+        .pay-footer-note {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        .pay-footer-note a {
+            color: #2563eb;
+            text-decoration: underline;
         }
 
         .form-group {
@@ -959,7 +1098,59 @@
                     <label>Sender Account Name (Name on bank account paying from)</label>
                     <input type="text" id="chk-sender-name" placeholder="e.g. John Doe">
                 </div>
-                <button class="btn-add-cart" onclick="submitOrder()" style="margin-top:5px;">Complete Order</button>
+                <button class="btn-add-cart" onclick="submitOrderAndShowPayment()" style="margin-top:5px;">Continue to Payment</button>
+            </div>
+        </div>
+
+        <!-- PAYMENT CONTINUATION MODAL (MATCHING REFERENCE IMAGE) -->
+        <div id="payment-continuation-modal">
+            <div class="pay-modal-box">
+                <div class="pay-banner">
+                    <button class="pay-banner-close" onclick="closePaymentContinuation()">&times;</button>
+                    <div class="pay-banner-title">Deposit</div>
+                    <div class="pay-banner-amount" id="pay-modal-amount">NGN 0.00</div>
+                    <div class="pay-banner-subtitle">Make a transfer of the exact amount to the account below</div>
+                </div>
+
+                <div class="pay-body">
+                    <div class="pay-warning-text">
+                        This account is valid for one time<br>Please do not transfer multiple times
+                    </div>
+
+                    <!-- Account Number Box -->
+                    <div class="pay-card-field">
+                        <div class="pay-field-info">
+                            <label>Account Number</label>
+                            <div class="pay-field-value" id="copy-acc-num">8054573433</div>
+                        </div>
+                        <button class="copy-btn" onclick="copyText('8054573433', this)">Copy</button>
+                    </div>
+
+                    <!-- Bank Name Box -->
+                    <div class="pay-card-field">
+                        <div class="pay-field-info">
+                            <label>Bank Name</label>
+                            <div class="pay-field-value" id="copy-bank-name">OPAY</div>
+                        </div>
+                        <button class="copy-btn" onclick="copyText('OPAY', this)">Copy</button>
+                    </div>
+
+                    <!-- Account Name Box -->
+                    <div class="pay-card-field">
+                        <div class="pay-field-info">
+                            <label>Account Name</label>
+                            <div class="pay-field-value" id="copy-acc-name">OLUFUNKE JANET OSAYOMI</div>
+                        </div>
+                        <button class="copy-btn" onclick="copyText('OLUFUNKE JANET OSAYOMI', this)">Copy</button>
+                    </div>
+
+                    <button class="btn-made-payment" onclick="finalizeOrderCompletion()">I have made the payment</button>
+
+                    <div class="pay-footer-note">
+                        If you have any questions, connect us by email.<br>
+                        Email address: <a href="mailto:brightmedia2@outlook.com">brightmedia2@outlook.com</a>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1016,6 +1207,7 @@
         let selectedSizes = {};
         let currentUser = null;
         let isSignUpMode = false;
+        let pendingOrderData = null;
 
         auth.onAuthStateChanged((user) => {
             currentUser = user;
@@ -1293,7 +1485,7 @@
             document.getElementById('checkout-modal').style.display = 'none';
         }
 
-        function submitOrder() {
+        function submitOrderAndShowPayment() {
             let name = document.getElementById('chk-name').value;
             let email = document.getElementById('chk-email').value;
             let phone = document.getElementById('chk-phone').value;
@@ -1309,8 +1501,9 @@
 
             let orderId = 'UT-' + Math.floor(100000 + Math.random() * 900000);
             let totalAmount = cart.reduce((sum, item) => sum + (parseInt(item.price.replace(/[^\d]/g, '')) * item.quantity), 0);
+            let formattedTotal = 'NGN ' + totalAmount.toLocaleString() + '.00';
 
-            let newOrder = {
+            pendingOrderData = {
                 id: orderId,
                 uid: currentUser ? currentUser.uid : 'guest',
                 name: name,
@@ -1324,14 +1517,40 @@
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            db.collection("orders").add(newOrder).then(() => {
-                alert(`Order Placed Successfully!\n\nPlease transfer total (${newOrder.total}) to our OPay Account:\nAccount Number: 9012345678\nAccount Name: Urban Thread Ltd\n\nOrder ID: ${orderId}`);
-                closeCheckoutForm();
+            // Close delivery modal and display payment continuation modal
+            closeCheckoutForm();
+            document.getElementById('pay-modal-amount').innerText = formattedTotal;
+            document.getElementById('payment-continuation-modal').style.display = 'flex';
+        }
+
+        function copyText(text, btnElement) {
+            navigator.clipboard.writeText(text).then(() => {
+                let originalText = btnElement.innerText;
+                btnElement.innerText = 'Copied!';
+                btnElement.style.background = '#16a34a';
+                setTimeout(() => {
+                    btnElement.innerText = originalText;
+                    btnElement.style.background = '#2563eb';
+                }, 2000);
+            });
+        }
+
+        function closePaymentContinuation() {
+            document.getElementById('payment-continuation-modal').style.display = 'none';
+        }
+
+        function finalizeOrderCompletion() {
+            if (!pendingOrderData) return;
+
+            db.collection("orders").add(pendingOrderData).then(() => {
+                alert(`Order Saved Successfully!\n\nOrder ID: ${pendingOrderData.id}\nWe are waiting for your transfer confirmation. Admin will verify shortly.`);
+                closePaymentContinuation();
                 cart = [];
                 updateCartUI();
+                pendingOrderData = null;
                 switchPage('orders');
             }).catch(error => {
-                alert("Error placing order: " + error.message);
+                alert("Error saving order: " + error.message);
             });
         }
 
@@ -1450,7 +1669,6 @@
                 const tbody = document.getElementById('admin-orders-body');
                 tbody.innerHTML = '';
                 
-                snapshot.failed = false;
                 snapshot.forEach((doc) => {
                     let ord = doc.data();
                     let docId = doc.id;
