@@ -1336,7 +1336,7 @@
                         <button class="copy-btn" onclick="copyText('OLUFUNKE JANET OSAYOMI', this)">Copy</button>
                     </div>
 
-                    <button class="btn-made-payment" onclick="handleMadePaymentClick()">I have made the payment</button>
+                    <button class="btn-made-payment" id="btn-made-payment" onclick="handleMadePaymentClick(this)">I have made the payment</button>
 
                     <div class="pay-footer-note">
                         If you have any questions, connect us by email.<br>
@@ -1485,6 +1485,7 @@
         let currentUser = null;
         let isSignUpMode = false;
         let pendingOrderData = null;
+        let isSubmittingOrder = false; // Flag to prevent multiple submissions
 
         // Carousel State Variables
         let currentModalImages = [];
@@ -1674,7 +1675,6 @@
                     let pId = doc.id;
                     let sizeButtons = '';
                     
-                    // Support legacy single images if multi-images don't exist yet
                     let imagesList = p.images && p.images.length > 0 ? p.images : [p.image];
                     let mainDisplayImg = imagesList[0];
                     let escapedImages = JSON.stringify(imagesList).replace(/"/g, '&quot;');
@@ -1834,6 +1834,16 @@
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
 
+            // Reset the "I have paid" button state every time a new checkout starts
+            isSubmittingOrder = false;
+            const payBtn = document.getElementById('btn-made-payment');
+            if (payBtn) {
+                payBtn.disabled = false;
+                payBtn.innerText = 'I have made the payment';
+                payBtn.style.opacity = '1';
+                payBtn.style.cursor = 'pointer';
+            }
+
             document.getElementById('checkout-modal').style.display = 'none';
             document.getElementById('pay-modal-amount').innerText = formattedTotal;
             document.getElementById('payment-continuation-modal').style.display = 'flex';
@@ -1855,10 +1865,20 @@
             document.getElementById('payment-continuation-modal').style.display = 'none';
         }
 
-        function handleMadePaymentClick() {
+        function handleMadePaymentClick(btn) {
+            if (isSubmittingOrder) return; // Prevent double click
+
             if (!pendingOrderData) {
                 alert('No order data found. Please try checking out again.');
                 return;
+            }
+
+            isSubmittingOrder = true;
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = 'Syncing Order...';
+                btn.style.opacity = '0.6';
+                btn.style.cursor = 'not-allowed';
             }
 
             db.collection("orders").add(pendingOrderData).then(() => {
@@ -1866,6 +1886,13 @@
                 document.getElementById('success-status-modal').style.display = 'flex';
             }).catch(error => {
                 alert("Error saving order: " + error.message);
+                isSubmittingOrder = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = 'I have made the payment';
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                }
             });
         }
 
