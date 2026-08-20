@@ -104,7 +104,6 @@
             100% { transform: translateY(0px) rotate(0deg); }
         }
 
-        /* Significantly Taller & Larger Logo Container on Loading Page */
         .splash-logo-container {
             display: flex;
             flex-direction: column;
@@ -117,7 +116,7 @@
 
         .splash-logo-img {
             width: clamp(340px, 90vw, 740px);
-            height: clamp(230px, 60vw, 480px); /* Made noticeably taller */
+            height: clamp(230px, 60vw, 480px);
             border-radius: 12px;
             object-fit: contain;
             background: rgba(255, 255, 255, 0.7);
@@ -125,7 +124,6 @@
             box-shadow: 0 10px 30px rgba(197, 160, 89, 0.45);
         }
 
-        /* Shifted Downwards Content Wrapper */
         .splash-content-shifted {
             display: flex;
             flex-direction: column;
@@ -298,6 +296,7 @@
             color: #fff;
         }
 
+        /* Updated Hero Section with IMG_7155.jpeg background */
         .hero {
             min-height: clamp(350px, 45vh, 500px);
             display: flex;
@@ -305,7 +304,7 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            background: linear-gradient(rgba(27, 54, 93, 0.65), rgba(27, 54, 93, 0.8)), url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1400&auto=format&fit=crop&q=80') center/cover no-repeat;
+            background: linear-gradient(rgba(27, 54, 93, 0.65), rgba(27, 54, 93, 0.8)), url('IMG_7155.jpeg') center/cover no-repeat;
             padding: clamp(20px, 5vw, 60px);
             color: #fff;
             width: 100%;
@@ -761,12 +760,10 @@
                 }
             </script>
 
-            <!-- Taller & Larger Logo Container (IMG_7155.jpeg) -->
             <div class="splash-logo-container">
                 <img src="IMG_7155.jpeg" class="splash-logo-img" alt="Urban Thread Logo" crossorigin="anonymous">
             </div>
             
-            <!-- Shifted Downwards Content Section -->
             <div class="splash-content-shifted">
                 <div class="splash-logo-text">URBAN THREAD</div>
                 <div class="splash-sub">Forged in Creativity</div>
