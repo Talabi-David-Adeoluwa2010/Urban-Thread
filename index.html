@@ -689,16 +689,6 @@
             padding: 20px;
         }
 
-        .modal-box {
-            background: #ffffff;
-            border: 1px solid var(--gray-border);
-            padding: clamp(20px, 3vw, 30px);
-            width: 100%;
-            max-width: 480px;
-            border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-
         /* --- STYLING FOR PAYMENT CONTINUATION MODAL --- */
         .pay-modal-box {
             background: #ffffff;
@@ -1017,6 +1007,85 @@
             cursor: pointer;
         }
 
+        /* --- CAROUSEL SLIDER MODAL STYLES --- */
+        #product-img-modal {
+            background: rgba(0, 0, 0, 0.9);
+            flex-direction: column;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .carousel-container {
+            position: relative;
+            max-width: 90vw;
+            max-height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-img {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 2px solid var(--accent-gold);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            border: 2px solid var(--accent-gold);
+            font-size: 1.8rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            z-index: 10;
+        }
+
+        .carousel-btn:hover {
+            background: var(--accent-gold);
+            color: #1b365d;
+        }
+
+        .carousel-btn.prev {
+            left: -25px;
+        }
+
+        .carousel-btn.next {
+            right: -25px;
+        }
+
+        .carousel-indicators {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .indicator-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            border: 1px solid var(--accent-gold);
+        }
+
+        .indicator-dot.active {
+            background: var(--accent-gold);
+        }
+
         @media screen and (min-width: 1024px) {
             .container {
                 padding: 40px 50px;
@@ -1305,7 +1374,7 @@
         <div id="admin-add-product-modal">
             <div class="modal-box">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <h3 style="color:#1b365d;">Add New Product Drop</h3>
+                    <h3 style="color:#1b365d;">Add New Product Drop (3 to 5 Images)</h3>
                     <button onclick="closeAddProductModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
                 </div>
                 <div class="form-group">
@@ -1321,8 +1390,9 @@
                     <textarea id="new-prod-desc" rows="3" placeholder="Describe the material, fit, and style..."></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Upload Image from Photo Library</label>
-                    <input type="file" id="new-prod-img-file" accept="image/*">
+                    <label>Upload Product Images (Select 3 to 5 images)</label>
+                    <input type="file" id="new-prod-img-files" accept="image/*" multiple>
+                    <small style="color:#64748b; font-size:0.72rem; display:block; margin-top:4px;">Hold Ctrl / Cmd or tap multiple times to select 3 to 5 photos.</small>
                 </div>
                 <div class="form-group">
                     <label>Available Sizes & Initial Stock Status</label>
@@ -1339,11 +1409,20 @@
             </div>
         </div>
 
-        <!-- FULL-SCREEN PRODUCT IMAGE MODAL -->
-        <div id="product-img-modal" style="background: rgba(0, 0, 0, 0.85); flex-direction: column; text-align: center;">
-            <button onclick="closeProductImageModal()" style="position: absolute; top: 20px; right: 25px; background: none; border: none; color: #fff; font-size: 2.5rem; cursor: pointer;">&times;</button>
-            <img id="modal-zoomed-img" src="" alt="Full Product View" style="max-width: 90%; max-height: 70vh; object-fit: contain; border-radius: 8px; border: 2px solid var(--accent-gold); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-            <div id="modal-zoomed-name" style="color: #fff; font-size: clamp(1rem, 2.5vw, 1.4rem); font-weight: 800; text-transform: uppercase; margin-top: 15px; letter-spacing: 0.1em;"></div>
+        <!-- CAROUSEL SWIPEABLE PRODUCT IMAGE MODAL -->
+        <div id="product-img-modal">
+            <button onclick="closeProductImageModal()" style="position: absolute; top: 20px; right: 25px; background: none; border: none; color: #fff; font-size: 2.5rem; cursor: pointer; z-index: 20;">&times;</button>
+            
+            <div class="carousel-container">
+                <button class="carousel-btn prev" onclick="slideImage(-1)">&#10094;</button>
+                <img id="modal-carousel-img" src="" alt="Product Slide" class="carousel-img">
+                <button class="carousel-btn next" onclick="slideImage(1)">&#10095;</button>
+            </div>
+
+            <div id="modal-zoomed-name" style="color: #fff; font-size: clamp(1rem, 2.5vw, 1.3rem); font-weight: 800; text-transform: uppercase; margin-top: 15px; letter-spacing: 0.1em;"></div>
+            
+            <!-- Indicators Dots -->
+            <div class="carousel-indicators" id="carousel-indicators"></div>
         </div>
 
         <!-- SECRET ADMIN DASHBOARD VIEW -->
@@ -1360,7 +1439,7 @@
             <table class="dashboard-table">
                 <thead>
                     <tr>
-                        <th>Image</th>
+                        <th>Images</th>
                         <th>Product Name & Description</th>
                         <th>Price</th>
                         <th>Sizes & Stock Toggles</th>
@@ -1406,6 +1485,10 @@
         let currentUser = null;
         let isSignUpMode = false;
         let pendingOrderData = null;
+
+        // Carousel State Variables
+        let currentModalImages = [];
+        let currentImageIndex = 0;
 
         auth.onAuthStateChanged((user) => {
             currentUser = user;
@@ -1536,15 +1619,44 @@
             }
         }
 
-        // --- PRODUCT IMAGE ZOOM POPUP FUNCTIONS ---
-        function openProductImageModal(imageSrc, productName) {
-            document.getElementById('modal-zoomed-img').src = imageSrc;
+        // --- CAROUSEL SLIDER MODAL FUNCTIONS ---
+        function openProductImageModal(imagesArray, productName) {
+            if (!imagesArray || imagesArray.length === 0) return;
+            currentModalImages = imagesArray;
+            currentImageIndex = 0;
             document.getElementById('modal-zoomed-name').innerText = productName;
+            updateCarouselView();
             document.getElementById('product-img-modal').style.display = 'flex';
         }
 
         function closeProductImageModal() {
             document.getElementById('product-img-modal').style.display = 'none';
+        }
+
+        function slideImage(direction) {
+            currentImageIndex += direction;
+            if (currentImageIndex < 0) {
+                currentImageIndex = currentModalImages.length - 1;
+            } else if (currentImageIndex >= currentModalImages.length) {
+                currentImageIndex = 0;
+            }
+            updateCarouselView();
+        }
+
+        function jumpToImage(index) {
+            currentImageIndex = index;
+            updateCarouselView();
+        }
+
+        function updateCarouselView() {
+            document.getElementById('modal-carousel-img').src = currentModalImages[currentImageIndex];
+            
+            // Build indicator dots
+            const dotsContainer = document.getElementById('carousel-indicators');
+            dotsContainer.innerHTML = '';
+            currentModalImages.forEach((_, idx) => {
+                dotsContainer.innerHTML += `<div class="indicator-dot ${idx === currentImageIndex ? 'active' : ''}" onclick="jumpToImage(${idx})"></div>`;
+            });
         }
 
         function loadProducts() {
@@ -1562,6 +1674,11 @@
                     let pId = doc.id;
                     let sizeButtons = '';
                     
+                    // Support legacy single images if multi-images don't exist yet
+                    let imagesList = p.images && p.images.length > 0 ? p.images : [p.image];
+                    let mainDisplayImg = imagesList[0];
+                    let escapedImages = JSON.stringify(imagesList).replace(/"/g, '&quot;');
+
                     p.sizes.forEach((sz, idx) => {
                         let isAvailable = p.stockStatus[idx];
                         sizeButtons += `<button class="size-btn ${isAvailable ? '' : 'out-of-stock'}" onclick="selectSize('${pId}', '${sz}', this)">${sz}</button>`;
@@ -1569,12 +1686,12 @@
 
                     grid.innerHTML += `
                         <div class="product-card">
-                            <img src="${p.image}" class="product-img" alt="${p.name}" onclick="openProductImageModal('${p.image}', '${p.name}')">
+                            <img src="${mainDisplayImg}" class="product-img" alt="${p.name}" onclick="openProductImageModal(${escapedImages}, '${p.name}')">
                             <div class="product-name">${p.name}</div>
                             <div class="product-desc">${p.description || 'No description provided.'}</div>
                             <div class="product-price">${p.price}</div>
                             <div class="size-selector" id="sizes-${pId}">${sizeButtons}</div>
-                            <button class="btn-add-cart" onclick="addToCart('${pId}', '${p.name}', '${p.price}', '${p.image}')">Add to Cart</button>
+                            <button class="btn-add-cart" onclick="addToCart('${pId}', '${p.name}', '${p.price}', '${mainDisplayImg}')">Add to Cart</button>
                         </div>
                     `;
                 });
@@ -1583,10 +1700,8 @@
 
         function seedDefaultProducts() {
             const defaultProducts = [
-                { name: 'UT Heritage Tech Polo - White', price: '₦45,000', description: 'Classic comfort cotton blend with breathable tech stitching.', image: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=500&auto=format&fit=crop&q=60', sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, true, true, true, true] },
-                { name: 'Britain Edition Tech Tracksuit', price: '₦95,000', description: 'Weather resistant street fashion fit.', image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&auto=format&fit=crop&q=60', sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, true, false, true, true] },
-                { name: 'Military Camo Tracksuit', price: '₦98,000', description: 'Heavy duty tactical cotton wear.', image: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=500&auto=format&fit=crop&q=60', sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, true, true, true, false] },
-                { name: 'Black & Gold Luxury Edition', price: '₦110,000', description: 'Limited edition gold embroidered luxury set.', image: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=500&auto=format&fit=crop&q=60', sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, false, true, true, true] }
+                { name: 'UT Heritage Tech Polo - White', price: '₦45,000', description: 'Classic comfort cotton blend with breathable tech stitching.', images: ['https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=500&auto=format&fit=crop&q=60', 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=60', 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=500&auto=format&fit=crop&q=60'], sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, true, true, true, true] },
+                { name: 'Britain Edition Tech Tracksuit', price: '₦95,000', description: 'Weather resistant street fashion fit.', images: ['https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&auto=format&fit=crop&q=60', 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=500&auto=format&fit=crop&q=60', 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=500&auto=format&fit=crop&q=60'], sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, true, false, true, true] }
             ];
             defaultProducts.forEach(prod => {
                 db.collection("products").add(prod);
@@ -1893,10 +2008,15 @@
             let name = document.getElementById('new-prod-name').value;
             let price = document.getElementById('new-prod-price').value;
             let desc = document.getElementById('new-prod-desc').value;
-            let fileInput = document.getElementById('new-prod-img-file');
+            let fileInput = document.getElementById('new-prod-img-files');
 
             if (!name || !price) {
                 alert('Please fill in at least the product name and price.');
+                return;
+            }
+
+            if (!fileInput.files || fileInput.files.length < 3 || fileInput.files.length > 5) {
+                alert('Please select between 3 to 5 images for this product.');
                 return;
             }
 
@@ -1913,35 +2033,40 @@
                 return;
             }
 
-            if (fileInput.files && fileInput.files[0]) {
+            let imagesArray = [];
+            let filesProcessed = 0;
+            const totalFiles = fileInput.files.length;
+
+            for (let i = 0; i < totalFiles; i++) {
                 let reader = new FileReader();
                 reader.onload = function(e) {
-                    let base64Image = e.target.result;
-                    pushProductToDb(name, price, desc, base64Image, sizes, stockStatus);
+                    imagesArray.push(e.target.result);
+                    filesProcessed++;
+                    if (filesProcessed === totalFiles) {
+                        pushProductToDb(name, price, desc, imagesArray, sizes, stockStatus);
+                    }
                 };
-                reader.readAsDataURL(fileInput.files[0]);
-            } else {
-                let defaultImg = 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=60';
-                pushProductToDb(name, price, desc, defaultImg, sizes, stockStatus);
+                reader.readAsDataURL(fileInput.files[i]);
             }
         }
 
-        function pushProductToDb(name, price, description, image, sizes, stockStatus) {
+        function pushProductToDb(name, price, description, images, sizes, stockStatus) {
             db.collection("products").add({
                 name,
                 price,
                 description,
-                image,
+                images,
+                image: images[0], // backward compatibility
                 sizes,
                 stockStatus,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
-                alert('Product published successfully! It is now synced instantly across all users.');
+                alert('Product published with multiple images successfully!');
                 closeAddProductModal();
                 document.getElementById('new-prod-name').value = '';
                 document.getElementById('new-prod-price').value = '';
                 document.getElementById('new-prod-desc').value = '';
-                document.getElementById('new-prod-img-file').value = '';
+                document.getElementById('new-prod-img-files').value = '';
             }).catch(error => {
                 alert('Error publishing product: ' + error.message);
             });
@@ -1961,6 +2086,12 @@
                     let p = doc.data();
                     let pId = doc.id;
                     let sizeTogglesHtml = '';
+                    let imagesList = p.images && p.images.length > 0 ? p.images : [p.image];
+                    
+                    let thumbsHtml = '';
+                    imagesList.forEach(imgUrl => {
+                        thumbsHtml += `<img src="${imgUrl}" style="width:35px; height:40px; object-fit:cover; border-radius:3px; margin-right:3px;" alt="thumb">`;
+                    });
 
                     p.sizes.forEach((sz, idx) => {
                         let isAvailable = p.stockStatus[idx];
@@ -1969,7 +2100,7 @@
 
                     tbody.innerHTML += `
                         <tr>
-                            <td><img src="${p.image}" style="width:50px; height:60px; object-fit:cover; border-radius:4px;" alt="prod"></td>
+                            <td><div style="display:flex; flex-wrap:wrap;">${thumbsHtml}</div></td>
                             <td><strong>${p.name}</strong><br><small style="color:#64748b;">${p.description || 'No description'}</small></td>
                             <td style="font-weight:bold; color:var(--accent-gold);">${p.price}</td>
                             <td>${sizeTogglesHtml}</td>
