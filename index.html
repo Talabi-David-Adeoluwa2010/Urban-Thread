@@ -1660,7 +1660,7 @@
         }
 
         function loadProducts() {
-            db.collection("products").onSnapshot((snapshot) => {
+            db.collection("products").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
                 const grid = document.getElementById('product-grid-container');
                 grid.innerHTML = '';
                 
@@ -1902,7 +1902,7 @@
 
         function loadMyOrders() {
             if (!currentUser) return;
-            db.collection("orders").where("userId", "==", currentUser.uid).onSnapshot((snapshot) => {
+            db.collection("orders").where("userId", "==", currentUser.uid).orderBy("timestamp", "desc").onSnapshot((snapshot) => {
                 const feed = document.getElementById('my-orders-feed');
                 feed.innerHTML = '';
 
@@ -1941,7 +1941,7 @@
         }
 
         function loadReviews() {
-            db.collection("reviews").onSnapshot((snapshot) => {
+            db.collection("reviews").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
                 const feed = document.getElementById('reviews-feed');
                 feed.innerHTML = '';
 
@@ -1998,8 +1998,8 @@
 
         function seedDefaultReviews() {
             const defaultReviews = [
-                { name: 'Marcus T.', rating: '★★★★★', comment: 'The quality of the tech fleece tracksuit is top tier.' },
-                { name: 'Sarah E.', rating: '★★★★★', comment: 'Fast delivery after bank transfer verification.' }
+                { name: 'Marcus T.', rating: '★★★★★', comment: 'The quality of the tech fleece tracksuit is top tier.', timestamp: firebase.firestore.FieldValue.serverTimestamp() },
+                { name: 'Sarah E.', rating: '★★★★★', comment: 'Fast delivery after bank transfer verification.', timestamp: firebase.firestore.FieldValue.serverTimestamp() }
             ];
             defaultReviews.forEach(rev => {
                 db.collection("reviews").add(rev).catch(err => console.error("Error seeding review: ", err));
@@ -2040,7 +2040,6 @@
             document.getElementById('admin-add-product-modal').style.display = 'none';
         }
 
-        // --- DYNAMIC IMAGE COMPRESSION FUNCTION (Forces file size below 1MB) ---
         function compressImage(file, maxMb = 0.8) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
@@ -2153,7 +2152,7 @@
         }
 
         function loadAdminProducts() {
-            db.collection("products").onSnapshot((snapshot) => {
+            db.collection("products").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
                 const tbody = document.getElementById('admin-products-body');
                 tbody.innerHTML = '';
 
