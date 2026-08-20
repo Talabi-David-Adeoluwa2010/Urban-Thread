@@ -687,7 +687,7 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
-        /* --- STYLING FOR PAYMENT CONTINUATION MODAL (MATCHING REFERENCE IMAGE) --- */
+        /* --- STYLING FOR PAYMENT CONTINUATION MODAL --- */
         .pay-modal-box {
             background: #ffffff;
             border-radius: 12px;
@@ -1009,7 +1009,7 @@
             <!-- MY ORDERS PAGE VIEW -->
             <div id="orders-view">
                 <button class="btn-back-page" onclick="switchPage('home')">← Back to Collection</button>
-                <h2 class="section-title">My Order History</h2>
+                <h2 class="section-title">My Order History & Payment Status</h2>
                 <div id="my-orders-feed"></div>
             </div>
         </div>
@@ -1102,7 +1102,7 @@
             </div>
         </div>
 
-        <!-- PAYMENT CONTINUATION MODAL (MATCHING REFERENCE IMAGE) -->
+        <!-- PAYMENT CONTINUATION MODAL -->
         <div id="payment-continuation-modal">
             <div class="pay-modal-box">
                 <div class="pay-banner">
@@ -1148,7 +1148,7 @@
 
                     <div class="pay-footer-note">
                         If you have any questions, connect us by email.<br>
-                        Email address: <a href="mailto:brightmedia2@outlook.com">brightmedia2@outlook.com</a>
+                        Email address: <a href="mailto:urbanthread@gmail.com">urbanthread@gmail.com</a>
                     </div>
                 </div>
             </div>
@@ -1517,7 +1517,6 @@
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            // Close delivery modal and display payment continuation modal
             closeCheckoutForm();
             document.getElementById('pay-modal-amount').innerText = formattedTotal;
             document.getElementById('payment-continuation-modal').style.display = 'flex';
@@ -1543,7 +1542,7 @@
             if (!pendingOrderData) return;
 
             db.collection("orders").add(pendingOrderData).then(() => {
-                alert(`Order Saved Successfully!\n\nOrder ID: ${pendingOrderData.id}\nWe are waiting for your transfer confirmation. Admin will verify shortly.`);
+                alert(`Order Submitted Successfully!\n\nOrder ID: ${pendingOrderData.id}\nYour order status is now set to 'Pending Bank Transfer Verification'. You can track it anytime under 'My Orders'.`);
                 closePaymentContinuation();
                 cart = [];
                 updateCartUI();
@@ -1567,7 +1566,7 @@
 
                 snapshot.forEach((doc) => {
                     let ord = doc.data();
-                    let isSuccessful = ord.status.includes('Successful');
+                    let isSuccessful = ord.status.includes('Successful') || ord.status.includes('Received');
                     feed.innerHTML += `
                         <div class="order-card">
                             <div style="display:flex; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:5px;">
@@ -1672,7 +1671,7 @@
                 snapshot.forEach((doc) => {
                     let ord = doc.data();
                     let docId = doc.id;
-                    let isSuccessful = ord.status.includes('Successful');
+                    let isSuccessful = ord.status.includes('Successful') || ord.status.includes('Received');
 
                     tbody.innerHTML += `
                         <tr>
@@ -1694,7 +1693,7 @@
 
         function approvePayment(docId, name, email, orderId, items, total) {
             db.collection("orders").doc(docId).update({
-                status: 'Payment Successful & Dispatched'
+                status: 'Payment Received & Dispatched'
             }).then(() => {
                 emailjs.send("default_service", "template_order_success", {
                     to_name: name,
@@ -1703,9 +1702,9 @@
                     order_items: items,
                     order_total: total
                 }).then(() => {
-                    alert(`Payment verified for ${name}! Email receipt sent.`);
+                    alert(`Payment verified for ${name}! Status updated to Received & Dispatched and email receipt sent.`);
                 }, (error) => {
-                    alert('Payment marked successful in Firestore, but email failed: ' + JSON.stringify(error));
+                    alert('Status updated in Firestore, but email failed: ' + JSON.stringify(error));
                 });
             });
         }
