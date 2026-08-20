@@ -1517,7 +1517,8 @@
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            closeCheckoutForm();
+            // FIX: Explicitly hide the checkout modal completely so it doesn't block clicks underneath
+            document.getElementById('checkout-modal').style.display = 'none';
             document.getElementById('pay-modal-amount').innerText = formattedTotal;
             document.getElementById('payment-continuation-modal').style.display = 'flex';
         }
