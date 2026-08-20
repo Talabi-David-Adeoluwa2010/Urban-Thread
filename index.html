@@ -826,7 +826,7 @@
             text-decoration: underline;
         }
 
-        /* --- STYLING FOR NEW PENDING SUCCESS NOTIFICATION MODAL --- */
+        /* --- STYLING FOR PENDING SUCCESS NOTIFICATION MODAL --- */
         .success-modal-box {
             background: #ffffff;
             border-radius: 12px;
@@ -1219,7 +1219,7 @@
             </div>
         </div>
 
-        <!-- NEW PENDING SUCCESS NOTIFICATION MODAL -->
+        <!-- PENDING SUCCESS NOTIFICATION MODAL -->
         <div id="success-status-modal">
             <div class="success-modal-box">
                 <div class="success-icon-wrap">⏳</div>
@@ -1228,7 +1228,7 @@
                     Thanks for shopping at Urban Thread!<br><br>
                     Check your order on your dashboard to see if the payment has been confirmed and track your order.
                 </div>
-                <button class="btn-continue-orders" onclick="redirectToOrdersTab()">Continue to Orders</button>
+                <button class="btn-continue-orders" onclick="redirectToOrdersTab()">Continue</button>
             </div>
         </div>
 
@@ -1620,8 +1620,9 @@
             if (!pendingOrderData) return;
 
             db.collection("orders").add(pendingOrderData).then(() => {
+                // Close the deposit payment instructions modal first
                 closePaymentContinuation();
-                // Show the new styled Pending Success Modal instead of an alert box
+                // Explicitly display the Pending Success Modal popup
                 document.getElementById('success-status-modal').style.display = 'flex';
             }).catch(error => {
                 alert("Error saving order: " + error.message);
