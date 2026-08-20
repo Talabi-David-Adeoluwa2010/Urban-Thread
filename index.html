@@ -1381,11 +1381,7 @@
                         closeAuthModal();
                     })
                     .catch((error) => {
-                        if (error.code === 'auth/configuration-not-found') {
-                            alert('Firebase Auth Configuration Error: Please ensure Email/Password sign-in provider is enabled in your Firebase Console.');
-                        } else {
-                            alert('Sign Up Error: ' + error.message);
-                        }
+                        alert('Invalid email or password.');
                     });
             } else {
                 auth.signInWithEmailAndPassword(email, password)
@@ -1394,11 +1390,7 @@
                         closeAuthModal();
                     })
                     .catch((error) => {
-                        if (error.code === 'auth/configuration-not-found') {
-                            alert('Firebase Auth Configuration Error: Please ensure Email/Password sign-in provider is enabled in your Firebase Console.');
-                        } else {
-                            alert('Sign In Error: ' + error.message);
-                        }
+                        alert('Invalid email or password.');
                     });
             }
         }
@@ -1630,7 +1622,10 @@
         }
 
         function finalizeOrderCompletion() {
-            if (!pendingOrderData) return;
+            if (!pendingOrderData) {
+                alert('No active order data found. Please complete the checkout form first.');
+                return;
+            }
 
             db.collection("orders").add(pendingOrderData).then(() => {
                 closePaymentContinuation();
@@ -1765,7 +1760,6 @@
         }
 
         function loadAdminOrders() {
-            // Global query fetching all customer orders ordered by newest first
             db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
                 const tbody = document.getElementById('admin-orders-body');
                 tbody.innerHTML = '';
