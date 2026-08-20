@@ -1872,14 +1872,32 @@
             isSubmittingOrder = true;
             if (btn) {
                 btn.disabled = true;
-                btn.innerText = 'Syncing order...';
+                btn.innerText = 'Submitting order & sending notification...';
                 btn.style.opacity = '0.6';
                 btn.style.cursor = 'not-allowed';
             }
 
+            // 1. Save order to Firestore first
             db.collection("orders").add(pendingOrderData).then(() => {
+                
+                // 2. Automatically send email notification via EmailJS right when payment button is clicked
+                emailjs.send("service_hw42hco", "template_order_success", {
+                    to_name: pendingOrderData.name,
+                    to_email: pendingOrderData.email,
+                    order_id: pendingOrderData.id,
+                    order_items: pendingOrderData.items,
+                    order_total: pendingOrderData.total,
+                    sender_name: pendingOrderData.senderName,
+                    delivery_address: pendingOrderData.address
+                }).then(() => {
+                    console.log("Payment notification email sent successfully.");
+                }, (emailError) => {
+                    console.warn("Order saved to database, but automated email failed to send: ", emailError);
+                });
+
                 closePaymentContinuation();
                 document.getElementById('success-status-modal').style.display = 'flex';
+
             }).catch(error => {
                 alert("Error saving order: " + error.message);
                 isSubmittingOrder = false;
@@ -2270,17 +2288,7 @@
             db.collection("orders").doc(docId).update({
                 status: 'Payment Received & Dispatched'
             }).then(() => {
-                emailjs.send("service_hw42hco", "template_order_success", {
-                    to_name: name,
-                    to_email: email,
-                    order_id: orderId,
-                    order_items: items,
-                    order_total: total
-                }).then(() => {
-                    alert(`Payment verified for ${name}! Status updated and email receipt sent.`);
-                }, (error) => {
-                    alert('Status updated in Firestore, but email failed: ' + JSON.stringify(error));
-                });
+                alert(`Payment verified for ${name}! Status updated successfully.`);
             }).catch(error => {
                 alert('Sync Error approving payment: ' + error.message);
             });
