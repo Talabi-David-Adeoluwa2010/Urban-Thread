@@ -1831,7 +1831,6 @@
             let totalAmount = cart.reduce((sum, item) => sum + (parseInt(item.price.replace(/[^\d]/g, '')) * item.quantity), 0);
             let formattedTotal = 'NGN ' + totalAmount.toLocaleString() + '.00';
 
-            // Fixed: Using userId to map precisely with security rules
             pendingOrderData = {
                 id: orderId,
                 userId: currentUser.uid,
@@ -1919,7 +1918,6 @@
 
         function loadMyOrders() {
             if (!currentUser) return;
-            // Fixed query: matching userId field with security rules
             db.collection("orders").where("userId", "==", currentUser.uid).onSnapshot((snapshot) => {
                 const feed = document.getElementById('my-orders-feed');
                 feed.innerHTML = '';
@@ -2000,7 +1998,7 @@
             }
 
             db.collection("reviews").add({
-                userId: currentUser.uid, // Fixed: Added userId for secure rules validation
+                userId: currentUser.uid,
                 name: name,
                 rating: rating,
                 comment: comment,
