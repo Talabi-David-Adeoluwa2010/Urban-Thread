@@ -468,8 +468,15 @@
             font-size: clamp(0.85rem, 1.5vw, 0.98rem);
             font-weight: 600;
             text-transform: uppercase;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             color: #1b365d;
+        }
+
+        .product-desc {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 8px;
+            line-height: 1.4;
         }
 
         .product-price {
@@ -664,7 +671,7 @@
             margin-bottom: 10px;
         }
 
-        #auth-modal, #checkout-modal, #payment-continuation-modal, #success-status-modal, #admin-modal {
+        #auth-modal, #checkout-modal, #payment-continuation-modal, #success-status-modal, #admin-modal, #admin-add-product-modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -681,7 +688,7 @@
             border: 1px solid var(--gray-border);
             padding: clamp(20px, 3vw, 30px);
             width: 100%;
-            max-width: 450px;
+            max-width: 480px;
             border-radius: 8px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
@@ -905,7 +912,7 @@
             font-weight: 700;
         }
 
-        .form-group input, .form-group select {
+        .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 11px;
             background: #f8fafc;
@@ -932,7 +939,8 @@
         .dashboard-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 15px;
+            margin-bottom: 30px;
             min-width: 800px;
         }
 
@@ -970,6 +978,37 @@
             font-weight: bold;
             font-size: 0.72rem;
             border-radius: 3px;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.72rem;
+            border-radius: 3px;
+        }
+
+        .size-checkboxes {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            background: #f8fafc;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .size-checkboxes label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            text-transform: none;
+            font-weight: 600;
+            cursor: pointer;
         }
 
         @media screen and (min-width: 1024px) {
@@ -1256,14 +1295,69 @@
             </div>
         </div>
 
+        <!-- ADMIN ADD PRODUCT MODAL -->
+        <div id="admin-add-product-modal">
+            <div class="modal-box">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="color:#1b365d;">Add New Product Drop</h3>
+                    <button onclick="closeAddProductModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+                </div>
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="new-prod-name" placeholder="e.g. UT Tech Fleece">
+                </div>
+                <div class="form-group">
+                    <label>Price (e.g. ₦55,000)</label>
+                    <input type="text" id="new-prod-price" placeholder="₦55,000">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="new-prod-desc" rows="3" placeholder="Describe the material, fit, and style..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Upload Image from Photo Library</label>
+                    <input type="file" id="new-prod-img-file" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label>Available Sizes & Initial Stock Status</label>
+                    <div class="size-checkboxes">
+                        <label><input type="checkbox" name="new-size" value="XS" checked> XS</label>
+                        <label><input type="checkbox" name="new-size" value="S" checked> S</label>
+                        <label><input type="checkbox" name="new-size" value="M" checked> M</label>
+                        <label><input type="checkbox" name="new-size" value="L" checked> L</label>
+                        <label><input type="checkbox" name="new-size" value="XL" checked> XL</label>
+                        <label><input type="checkbox" name="new-size" value="XXL" checked> XXL</label>
+                    </div>
+                </div>
+                <button class="btn-add-cart" onclick="saveNewProductToFirestore()">Publish Product</button>
+            </div>
+        </div>
+
         <!-- SECRET ADMIN DASHBOARD VIEW -->
         <div id="admin-dashboard">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                <h2 style="color:#1b365d; font-size: clamp(1.1rem, 2.5vw, 1.4rem);">Admin Control Center — Global Orders & Delivery</h2>
-                <button class="btn-auth" onclick="logoutAdmin()">Logout</button>
+                <h2 style="color:#1b365d; font-size: clamp(1.1rem, 2.5vw, 1.4rem);">Admin Control Center — Products & Orders</h2>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-check-status" onclick="openAddProductModal()">+ Add New Product</button>
+                    <button class="btn-auth" onclick="logoutAdmin()">Logout</button>
+                </div>
             </div>
+
+            <h3 style="color:#1b365d; font-size:1.1rem;">Manage Store Products (Add, Delete & Stock)</h3>
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Product Name & Description</th>
+                        <th>Price</th>
+                        <th>Sizes & Stock Toggles</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-products-body"></tbody>
+            </table>
             
-            <h3 style="color:#1b365d; font-size:1.1rem;">All Global Customer Orders</h3>
+            <h3 style="color:#1b365d; font-size:1.1rem; margin-top:40px;">All Global Customer Orders</h3>
             <table class="dashboard-table">
                 <thead>
                     <tr>
@@ -1453,6 +1547,7 @@
                         <div class="product-card">
                             <img src="${p.image}" class="product-img" alt="${p.name}">
                             <div class="product-name">${p.name}</div>
+                            <div class="product-desc">${p.description || 'No description provided.'}</div>
                             <div class="product-price">${p.price}</div>
                             <div class="size-selector" id="sizes-${pId}">${sizeButtons}</div>
                             <button class="btn-add-cart" onclick="addToCart('${pId}', '${p.name}', '${p.price}', '${p.image}')">Add to Cart</button>
@@ -1464,10 +1559,10 @@
 
         function seedDefaultProducts() {
             const defaultProducts = [
-                { name: 'UT Heritage Tech Polo - White', price: '₦45,000', image: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=500&auto=format&fit=crop&q=60', sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, true, true, true, true] },
-                { name: 'Britain Edition Tech Tracksuit', price: '₦95,000', image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&auto=format&fit=crop&q=60', sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, true, false, true, true] },
-                { name: 'Military Camo Tracksuit', price: '₦98,000', image: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=500&auto=format&fit=crop&q=60', sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, true, true, true, false] },
-                { name: 'Black & Gold Luxury Edition', price: '₦110,000', image: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=500&auto=format&fit=crop&q=60', sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, false, true, true, true] }
+                { name: 'UT Heritage Tech Polo - White', price: '₦45,000', description: 'Classic comfort cotton blend with breathable tech stitching.', image: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=500&auto=format&fit=crop&q=60', sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, true, true, true, true] },
+                { name: 'Britain Edition Tech Tracksuit', price: '₦95,000', description: 'Weather resistant street fashion fit.', image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&auto=format&fit=crop&q=60', sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, true, false, true, true] },
+                { name: 'Military Camo Tracksuit', price: '₦98,000', description: 'Heavy duty tactical cotton wear.', image: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=500&auto=format&fit=crop&q=60', sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, true, true, true, false] },
+                { name: 'Black & Gold Luxury Edition', price: '₦110,000', description: 'Limited edition gold embroidered luxury set.', image: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=500&auto=format&fit=crop&q=60', sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], stockStatus: [true, true, false, true, true, true] }
             ];
             defaultProducts.forEach(prod => {
                 db.collection("products").add(prod);
@@ -1656,7 +1751,7 @@
 
                 snapshot.forEach((doc) => {
                     let ord = doc.data();
-                    let statusColor = '#f59e0b'; // Pending
+                    let statusColor = '#f59e0b';
                     let statusBadgeText = ord.status || 'Payment Pending';
                     
                     if (statusBadgeText.includes('Successful') || statusBadgeText.includes('Received')) {
@@ -1751,6 +1846,7 @@
                 document.getElementById('main-store').style.display = 'none';
                 document.getElementById('admin-dashboard').style.display = 'block';
                 loadAdminOrders();
+                loadAdminProducts();
             } else {
                 alert('Incorrect Admin Password');
             }
@@ -1759,6 +1855,131 @@
         function logoutAdmin() {
             document.getElementById('admin-dashboard').style.display = 'none';
             document.getElementById('main-store').style.display = 'block';
+        }
+
+        function openAddProductModal() {
+            document.getElementById('admin-add-product-modal').style.display = 'flex';
+        }
+
+        function closeAddProductModal() {
+            document.getElementById('admin-add-product-modal').style.display = 'none';
+        }
+
+        function saveNewProductToFirestore() {
+            let name = document.getElementById('new-prod-name').value;
+            let price = document.getElementById('new-prod-price').value;
+            let desc = document.getElementById('new-prod-desc').value;
+            let fileInput = document.getElementById('new-prod-img-file');
+
+            if (!name || !price) {
+                alert('Please fill in at least the product name and price.');
+                return;
+            }
+
+            let sizeCheckboxes = document.querySelectorAll('input[name="new-size"]:checked');
+            let sizes = [];
+            let stockStatus = [];
+            sizeCheckboxes.forEach(cb => {
+                sizes.push(cb.value);
+                stockStatus.push(true);
+            });
+
+            if (sizes.length === 0) {
+                alert('Please select at least one available size.');
+                return;
+            }
+
+            if (fileInput.files && fileInput.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    let base64Image = e.target.result;
+                    pushProductToDb(name, price, desc, base64Image, sizes, stockStatus);
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                // Fallback default image if none uploaded
+                let defaultImg = 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=60';
+                pushProductToDb(name, price, desc, defaultImg, sizes, stockStatus);
+            }
+        }
+
+        function pushProductToDb(name, price, description, image, sizes, stockStatus) {
+            db.collection("products").add({
+                name,
+                price,
+                description,
+                image,
+                sizes,
+                stockStatus,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                alert('Product published successfully! It is now synced instantly across all users.');
+                closeAddProductModal();
+                document.getElementById('new-prod-name').value = '';
+                document.getElementById('new-prod-price').value = '';
+                document.getElementById('new-prod-desc').value = '';
+                document.getElementById('new-prod-img-file').value = '';
+            }).catch(error => {
+                alert('Error publishing product: ' + error.message);
+            });
+        }
+
+        function loadAdminProducts() {
+            db.collection("products").onSnapshot((snapshot) => {
+                const tbody = document.getElementById('admin-products-body');
+                tbody.innerHTML = '';
+
+                if (snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#64748b;">No products found in store.</td></tr>';
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    let p = doc.data();
+                    let pId = doc.id;
+                    let sizeTogglesHtml = '';
+
+                    p.sizes.forEach((sz, idx) => {
+                        let isAvailable = p.stockStatus[idx];
+                        sizeTogglesHtml += `<button onclick="toggleProductStock('${pId}', ${idx}, ${!isAvailable})" class="btn-approve" style="background:${isAvailable ? '#16a34a' : '#dc2626'}; margin-right:4px; margin-bottom:4px;">${sz}: ${isAvailable ? 'In Stock' : 'Out of Stock'}</button>`;
+                    });
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><img src="${p.image}" style="width:50px; height:60px; object-fit:cover; border-radius:4px;" alt="prod"></td>
+                            <td><strong>${p.name}</strong><br><small style="color:#64748b;">${p.description || 'No description'}</small></td>
+                            <td style="font-weight:bold; color:var(--accent-gold);">${p.price}</td>
+                            <td>${sizeTogglesHtml}</td>
+                            <td>
+                                <button class="btn-danger" onclick="deleteProduct('${pId}')">Delete Product</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        function toggleProductStock(productId, sizeIndex, newStatus) {
+            db.collection("products").doc(productId).get().then((doc) => {
+                if (doc.exists) {
+                    let data = doc.data();
+                    let updatedStock = [...data.stockStatus];
+                    updatedStock[sizeIndex] = newStatus;
+                    db.collection("products").doc(productId).update({
+                        stockStatus: updatedStock
+                    });
+                }
+            });
+        }
+
+        function deleteProduct(productId) {
+            if (confirm('Are you sure you want to permanently delete this product from the store?')) {
+                db.collection("products").doc(productId).delete().then(() => {
+                    alert('Product deleted successfully.');
+                }).catch(error => {
+                    alert('Error deleting product: ' + error.message);
+                });
+            }
         }
 
         function loadAdminOrders() {
