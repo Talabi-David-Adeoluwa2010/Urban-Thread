@@ -8,7 +8,7 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
         (function() {
-            emailjs.init("YOUR_PUBLIC_KEY");
+            emailjs.init("VlUqN2N3V1d8YTR3ZQ==");
         })();
     </script>
     <!-- Firebase SDKs -->
@@ -2270,7 +2270,7 @@
             db.collection("orders").doc(docId).update({
                 status: 'Payment Received & Dispatched'
             }).then(() => {
-                emailjs.send("default_service", "template_order_success", {
+                emailjs.send("service_hw42hco", "template_order_success", {
                     to_name: name,
                     to_email: email,
                     order_id: orderId,
