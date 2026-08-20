@@ -689,7 +689,7 @@
             padding: 20px;
         }
 
-        /* --- STYLING FOR PAYMENT CONTINUATION MODAL --- */
+        /* --- STYLING FOR PAYMENT & CHECKOUT MODALS --- */
         .pay-modal-box {
             background: #ffffff;
             border-radius: 12px;
@@ -829,55 +829,32 @@
             text-decoration: underline;
         }
 
-        /* --- STYLING FOR PENDING SUCCESS NOTIFICATION MODAL --- */
-        .success-modal-box {
-            background: #ffffff;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 440px;
-            padding: 30px 25px;
-            text-align: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            border-top: 6px var(--accent-gold) solid;
-        }
-
-        .success-icon-wrap {
-            width: 65px;
-            height: 65px;
+        /* --- STYLING FOR PENDING STATUS MODAL MATCHING ACCOUNT DETAILS PAGE --- */
+        .status-badge-pill {
+            display: inline-block;
             background: #fef3c7;
+            border: 1px solid #fde68a;
             color: #d97706;
-            font-size: 2rem;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 18px auto;
-            border: 2px solid #fde68a;
-        }
-
-        .success-title {
-            font-size: 1.25rem;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.82rem;
             font-weight: 800;
-            color: #1b365d;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 12px;
+            letter-spacing: 0.08em;
+            margin-bottom: 15px;
         }
 
-        .success-message-body {
+        .status-body-text {
             font-size: 0.9rem;
             color: #475569;
             line-height: 1.6;
-            margin-bottom: 22px;
-        }
-
-        .success-message-body strong {
-            color: #1b365d;
+            margin-bottom: 25px;
+            text-align: center;
         }
 
         .btn-continue-orders {
             width: 100%;
-            background: var(--accent-blue);
+            background: #2563eb;
             color: #fff;
             border: none;
             padding: 14px;
@@ -887,7 +864,7 @@
             cursor: pointer;
             font-size: 0.85rem;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(27, 54, 93, 0.3);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
             transition: opacity 0.2s;
         }
 
@@ -1224,73 +1201,79 @@
 
         <!-- AUTH MODAL -->
         <div id="auth-modal">
-            <div class="modal-box">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <h3 id="auth-modal-title" style="color:#1b365d;">Sign In to Urban Thread</h3>
-                    <button onclick="closeAuthModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+            <div class="pay-modal-box">
+                <div class="pay-banner">
+                    <button class="pay-banner-close" onclick="closeAuthModal()">&times;</button>
+                    <div class="pay-banner-title">Account Access</div>
+                    <div class="pay-banner-amount" style="font-size: 1.4rem;" id="auth-modal-title">Sign In</div>
+                    <div class="pay-banner-subtitle">Urban Thread Customer Portal</div>
                 </div>
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" id="auth-email" placeholder="name@example.com">
+                <div class="pay-body">
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="auth-email" placeholder="name@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="auth-password" placeholder="••••••••">
+                    </div>
+                    <button class="btn-made-payment" id="auth-submit-btn" onclick="performAuthAction()">Sign In</button>
+                    <p style="text-align:center; margin-top:15px; font-size:0.82srem;">
+                        <span id="auth-switch-text">Don't have an account?</span> 
+                        <a onclick="toggleAuthMode()" style="color:#2563eb; cursor:pointer; font-weight:bold;" id="auth-switch-link">Sign Up</a>
+                    </p>
                 </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="auth-password" placeholder="••••••••">
-                </div>
-                <button class="btn-add-cart" id="auth-submit-btn" onclick="performAuthAction()">Sign In</button>
-                <p style="text-align:center; margin-top:15px; font-size:0.82rem;">
-                    <span id="auth-switch-text">Don't have an account?</span> 
-                    <a onclick="toggleAuthMode()" style="color:var(--accent-gold); cursor:pointer; font-weight:bold;" id="auth-switch-link">Sign Up</a>
-                </p>
             </div>
         </div>
 
         <!-- CHECKOUT FORM MODAL -->
         <div id="checkout-modal">
-            <div class="modal-box">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <h3 style="color:#1b365d;">Checkout & Delivery</h3>
-                    <button onclick="closeCheckoutForm()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+            <div class="pay-modal-box">
+                <div class="pay-banner">
+                    <button class="pay-banner-close" onclick="closeCheckoutForm()">&times;</button>
+                    <div class="pay-banner-title">Checkout & Delivery</div>
+                    <div class="pay-banner-amount" style="font-size: 1.3rem;">Order Fulfillment</div>
+                    <div class="pay-banner-subtitle">Provide your accurate delivery information</div>
                 </div>
-                <p style="color:#64748b; font-size:0.78rem; margin-bottom:15px;">Provide your accurate delivery information for fulfillment.</p>
-                
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" id="chk-name" placeholder="Enter your full name">
-                </div>
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" id="chk-email" placeholder="name@example.com">
-                </div>
-                <div class="form-group">
-                    <label>Phone Number (for delivery rider)</label>
-                    <input type="tel" id="chk-phone" placeholder="08012345678">
-                </div>
-                <div class="form-group">
-                    <label>Street Address</label>
-                    <input type="text" id="chk-address" placeholder="House number and street name">
-                </div>
-                <div class="form-row">
-                    <div class="form-group" style="flex:1;">
-                        <label>City</label>
-                        <input type="text" id="chk-city" placeholder="City">
+                <div class="pay-body" style="max-height: 65vh; overflow-y: auto;">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="chk-name" placeholder="Enter your full name">
                     </div>
-                    <div class="form-group" style="flex:1;">
-                        <label>State / Province</label>
-                        <input type="text" id="chk-state" placeholder="State">
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="chk-email" placeholder="name@example.com">
                     </div>
+                    <div class="form-group">
+                        <label>Phone Number (for delivery rider)</label>
+                        <input type="tel" id="chk-phone" placeholder="08012345678">
+                    </div>
+                    <div class="form-group">
+                        <label>Street Address</label>
+                        <input type="text" id="chk-address" placeholder="House number and street name">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="flex:1;">
+                            <label>City</label>
+                            <input type="text" id="chk-city" placeholder="City">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>State / Province</label>
+                            <input type="text" id="chk-state" placeholder="State">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Method</label>
+                        <select id="chk-payment">
+                            <option value="Bank Transfer">Direct Bank Transfer (OPay)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Sender Account Name (Name on bank account paying from)</label>
+                        <input type="text" id="chk-sender-name" placeholder="e.g. John Doe">
+                    </div>
+                    <button class="btn-made-payment" onclick="proceedToPaymentDetails()" style="margin-top:5px;">Proceed</button>
                 </div>
-                <div class="form-group">
-                    <label>Payment Method</label>
-                    <select id="chk-payment">
-                        <option value="Bank Transfer">Direct Bank Transfer (OPay)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Sender Account Name (Name on bank account paying from)</label>
-                    <input type="text" id="chk-sender-name" placeholder="e.g. John Doe">
-                </div>
-                <button class="btn-add-cart" onclick="proceedToPaymentDetails()" style="margin-top:5px;">Proceed</button>
             </div>
         </div>
 
@@ -1346,66 +1329,84 @@
             </div>
         </div>
 
-        <!-- PENDING SUCCESS NOTIFICATION MODAL -->
+        <!-- PENDING SUCCESS NOTIFICATION MODAL (MATCHING ACCOUNT DETAILS PAGE SIZE & STYLE) -->
         <div id="success-status-modal">
-            <div class="success-modal-box">
-                <div class="success-icon-wrap">⏳</div>
-                <div class="success-title">Your order payment is pending</div>
-                <div class="success-message-body">
-                    Thanks for shopping at Urban Thread!<br><br>
-                    Your payment is being verified by the administrator.
+            <div class="pay-modal-box">
+                <div class="pay-banner">
+                    <button class="pay-banner-close" onclick="redirectToOrdersTab()">&times;</button>
+                    <div class="pay-banner-title">Payment Verification</div>
+                    <div class="pay-banner-amount" style="font-size: 1.5rem;">Urban Threads</div>
+                    <div class="pay-banner-subtitle">Order Status Update</div>
                 </div>
-                <button class="btn-continue-orders" onclick="redirectToOrdersTab()">Continue to view your order</button>
+
+                <div class="pay-body" style="text-align: center; padding: 25px 20px;">
+                    <div class="status-badge-pill">⏳ Your Payment Is Pending</div>
+                    <div class="status-body-text">
+                        Thanks for shopping at Urbanthreads!<br><br>
+                        Your payment is being reviewed by the administrator.
+                    </div>
+                    <button class="btn-continue-orders" onclick="redirectToOrdersTab()">Click continue to monitor your order status</button>
+                </div>
             </div>
         </div>
 
         <!-- SECRET ADMIN BACKDOOR MODAL -->
         <div id="admin-modal">
-            <div class="modal-box" style="text-align:center;">
-                <h3 style="color:#1b365d;">Secret Admin Control</h3>
-                <p style="color: #64748b; font-size: 0.78rem; margin-top: 6px; margin-bottom: 12px;">Enter Access Password</p>
-                <input type="password" id="admin-pwd-input" placeholder="••••••••••••" style="margin-bottom: 12px;">
-                <button class="btn-add-cart" onclick="verifyAdminPassword()">Login</button>
-                <button style="background:none; border:none; color:#64748b; margin-top:14px; cursor:pointer; font-size:0.78rem;" onclick="closeAdminModal()">Cancel</button>
+            <div class="pay-modal-box" style="max-width: 380px;">
+                <div class="pay-banner">
+                    <button class="pay-banner-close" onclick="closeAdminModal()">&times;</button>
+                    <div class="pay-banner-title">Restricted Access</div>
+                    <div class="pay-banner-amount" style="font-size: 1.3rem;">Secret Admin</div>
+                </div>
+                <div class="pay-body" style="text-align: center;">
+                    <p style="color: #64748b; font-size: 0.78rem; margin-bottom: 12px;">Enter Access Password</p>
+                    <input type="password" id="admin-pwd-input" placeholder="••••••••••••" style="width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 15px;">
+                    <button class="btn-made-payment" onclick="verifyAdminPassword()" style="margin-top: 0; margin-bottom: 10px;">Login</button>
+                    <button style="background:none; border:none; color:#64748b; cursor:pointer; font-size:0.78rem;" onclick="closeAdminModal()">Cancel</button>
+                </div>
             </div>
         </div>
 
         <!-- ADMIN ADD PRODUCT MODAL -->
         <div id="admin-add-product-modal">
-            <div class="modal-box">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <h3 style="color:#1b365d;">Add New Product Drop (3 to 5 Images)</h3>
-                    <button onclick="closeAddProductModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+            <div class="pay-modal-box">
+                <div class="pay-banner">
+                    <button class="pay-banner-close" onclick="closeAddProductModal()">&times;</button>
+                    <div class="pay-banner-title">Inventory Control</div>
+                    <div class="pay-banner-amount" style="font-size: 1.3rem;">New Product Drop</div>
+                    <div class="pay-banner-subtitle">Upload 3 to 5 Images</div>
                 </div>
-                <div class="form-group">
-                    <label>Product Name</label>
-                    <input type="text" id="new-prod-name" placeholder="e.g. UT Tech Fleece">
-                </div>
-                <div class="form-group">
-                    <label>Price (e.g. ₦55,000)</label>
-                    <input type="text" id="new-prod-price" placeholder="₦55,000">
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="new-prod-desc" rows="3" placeholder="Describe the material, fit, and style..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Upload Product Images (Select 3 to 5 images)</label>
-                    <input type="file" id="new-prod-img-files" accept="image/*" multiple>
-                    <small style="color:#64748b; font-size:0.72rem; display:block; margin-top:4px;">Hold Ctrl / Cmd or tap multiple times to select 3 to 5 photos.</small>
-                </div>
-                <div class="form-group">
-                    <label>Available Sizes & Initial Stock Status</label>
-                    <div class="size-checkboxes">
-                        <label><input type="checkbox" name="new-size" value="XS" checked> XS</label>
-                        <label><input type="checkbox" name="new-size" value="S" checked> S</label>
-                        <label><input type="checkbox" name="new-size" value="M" checked> M</label>
-                        <label><input type="checkbox" name="new-size" value="L" checked> L</label>
-                        <label><input type="checkbox" name="new-size" value="XL" checked> XL</label>
-                        <label><input type="checkbox" name="new-size" value="XXL" checked> XXL</label>
+                <div class="pay-body" style="max-height: 65vh; overflow-y: auto;">
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <input type="text" id="new-prod-name" placeholder="e.g. UT Tech Fleece">
                     </div>
+                    <div class="form-group">
+                        <label>Price (e.g. ₦55,000)</label>
+                        <input type="text" id="new-prod-price" placeholder="₦55,000">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="new-prod-desc" rows="3" placeholder="Describe the material, fit, and style..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Upload Product Images (Select 3 to 5 images)</label>
+                        <input type="file" id="new-prod-img-files" accept="image/*" multiple>
+                        <small style="color:#64748b; font-size:0.72rem; display:block; margin-top:4px;">Hold Ctrl / Cmd or tap multiple times to select 3 to 5 photos.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Available Sizes & Initial Stock Status</label>
+                        <div class="size-checkboxes">
+                            <label><input type="checkbox" name="new-size" value="XS" checked> XS</label>
+                            <label><input type="checkbox" name="new-size" value="S" checked> S</label>
+                            <label><input type="checkbox" name="new-size" value="M" checked> M</label>
+                            <label><input type="checkbox" name="new-size" value="L" checked> L</label>
+                            <label><input type="checkbox" name="new-size" value="XL" checked> XL</label>
+                            <label><input type="checkbox" name="new-size" value="XXL" checked> XXL</label>
+                        </div>
+                    </div>
+                    <button class="btn-made-payment" onclick="saveNewProductToFirestore()" style="margin-top: 10px; margin-bottom: 0;">Publish Product</button>
                 </div>
-                <button class="btn-add-cart" onclick="saveNewProductToFirestore()">Publish Product</button>
             </div>
         </div>
 
@@ -1485,7 +1486,7 @@
         let currentUser = null;
         let isSignUpMode = false;
         let pendingOrderData = null;
-        let isSubmittingOrder = false; // Flag to prevent multiple submissions
+        let isSubmittingOrder = false;
 
         // Carousel State Variables
         let currentModalImages = [];
@@ -1550,7 +1551,7 @@
 
         function toggleAuthMode() {
             isSignUpMode = !isSignUpMode;
-            document.getElementById('auth-modal-title').innerText = isSignUpMode ? 'Create Urban Thread Account' : 'Sign In to Urban Thread';
+            document.getElementById('auth-modal-title').innerText = isSignUpMode ? 'Create Account' : 'Sign In';
             document.getElementById('auth-submit-btn').innerText = isSignUpMode ? 'Sign Up' : 'Sign In';
             document.getElementById('auth-switch-text').innerText = isSignUpMode ? 'Already have an account?' : "Don't have an account?";
             document.getElementById('auth-switch-link').innerText = isSignUpMode ? 'Sign In' : 'Sign Up';
@@ -1652,7 +1653,6 @@
         function updateCarouselView() {
             document.getElementById('modal-carousel-img').src = currentModalImages[currentImageIndex];
             
-            // Build indicator dots
             const dotsContainer = document.getElementById('carousel-indicators');
             dotsContainer.innerHTML = '';
             currentModalImages.forEach((_, idx) => {
@@ -1834,7 +1834,6 @@
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            // Reset the "I have paid" button state every time a new checkout starts
             isSubmittingOrder = false;
             const payBtn = document.getElementById('btn-made-payment');
             if (payBtn) {
@@ -1866,7 +1865,7 @@
         }
 
         function handleMadePaymentClick(btn) {
-            if (isSubmittingOrder) return; // Prevent double click
+            if (isSubmittingOrder) return;
 
             if (!pendingOrderData) {
                 alert('No order data found. Please try checking out again.');
@@ -2083,7 +2082,7 @@
                 price,
                 description,
                 images,
-                image: images[0], // backward compatibility
+                image: images[0],
                 sizes,
                 stockStatus,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
