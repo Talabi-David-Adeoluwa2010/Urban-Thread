@@ -1821,13 +1821,20 @@
                 return;
             }
 
+            if (!currentUser) {
+                alert('Authentication required. Please sign in again.');
+                openAuthModal();
+                return;
+            }
+
             let orderId = 'UT-' + Math.floor(100000 + Math.random() * 900000);
             let totalAmount = cart.reduce((sum, item) => sum + (parseInt(item.price.replace(/[^\d]/g, '')) * item.quantity), 0);
             let formattedTotal = 'NGN ' + totalAmount.toLocaleString() + '.00';
 
+            // Fixed: Using userId to map precisely with security rules
             pendingOrderData = {
                 id: orderId,
-                uid: currentUser ? currentUser.uid : 'guest',
+                userId: currentUser.uid,
                 name: name,
                 email: email,
                 phone: phone,
@@ -1912,7 +1919,8 @@
 
         function loadMyOrders() {
             if (!currentUser) return;
-            db.collection("orders").where("uid", "==", currentUser.uid).onSnapshot((snapshot) => {
+            // Fixed query: matching userId field with security rules
+            db.collection("orders").where("userId", "==", currentUser.uid).onSnapshot((snapshot) => {
                 const feed = document.getElementById('my-orders-feed');
                 feed.innerHTML = '';
 
@@ -1976,6 +1984,12 @@
         }
 
         function submitReview() {
+            if (!currentUser) {
+                alert('Please sign in to leave a review.');
+                openAuthModal();
+                return;
+            }
+
             let name = document.getElementById('rev-name').value;
             let rating = document.getElementById('rev-rating').value;
             let comment = document.getElementById('rev-comment').value;
@@ -1986,6 +2000,7 @@
             }
 
             db.collection("reviews").add({
+                userId: currentUser.uid, // Fixed: Added userId for secure rules validation
                 name: name,
                 rating: rating,
                 comment: comment,
