@@ -114,11 +114,14 @@
             width: 100%;
         }
 
+        /* Updated to be big, square, and full width */
         .splash-logo-img {
-            width: clamp(340px, 90vw, 740px);
-            height: clamp(230px, 60vw, 480px);
-            border-radius: 12px;
-            object-fit: contain;
+            width: 92vw;
+            height: 92vw;
+            max-width: 500px;
+            max-height: 500px;
+            border-radius: 16px;
+            object-fit: cover;
             background: rgba(255, 255, 255, 0.7);
             border: 2px solid var(--accent-gold);
             box-shadow: 0 10px 30px rgba(197, 160, 89, 0.45);
@@ -296,7 +299,7 @@
             color: #fff;
         }
 
-        /* Hero Section updated with IMG_7245.jpeg background */
+        /* Hero Section */
         .hero {
             min-height: clamp(350px, 50vh, 550px);
             display: flex;
@@ -311,7 +314,6 @@
             position: relative;
         }
 
-        /* Overlay to ensure text remains clearly readable over full image */
         .hero::before {
             content: '';
             position: absolute;
