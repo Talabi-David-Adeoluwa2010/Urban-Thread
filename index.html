@@ -957,6 +957,19 @@
             font-weight: bold;
             font-size: 0.72rem;
             border-radius: 3px;
+            margin-right: 4px;
+            margin-bottom: 4px;
+        }
+
+        .btn-deliver {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.72rem;
+            border-radius: 3px;
         }
 
         @media screen and (min-width: 1024px) {
@@ -1246,11 +1259,11 @@
         <!-- SECRET ADMIN DASHBOARD VIEW -->
         <div id="admin-dashboard">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                <h2 style="color:#1b365d; font-size: clamp(1.1rem, 2.5vw, 1.4rem);">Admin Control Center — Bank Transfer Verification</h2>
+                <h2 style="color:#1b365d; font-size: clamp(1.1rem, 2.5vw, 1.4rem);">Admin Control Center — Global Orders & Delivery</h2>
                 <button class="btn-auth" onclick="logoutAdmin()">Logout</button>
             </div>
             
-            <h3 style="color:#1b365d; font-size:1.1rem;">Incoming Customer Orders</h3>
+            <h3 style="color:#1b365d; font-size:1.1rem;">All Global Customer Orders</h3>
             <table class="dashboard-table">
                 <thead>
                     <tr>
@@ -1261,7 +1274,7 @@
                         <th>Items & Sizes</th>
                         <th>Total</th>
                         <th>Payment Status</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="admin-orders-body"></tbody>
@@ -1620,9 +1633,7 @@
             if (!pendingOrderData) return;
 
             db.collection("orders").add(pendingOrderData).then(() => {
-                // Close the deposit payment instructions modal first
                 closePaymentContinuation();
-                // Explicitly display the Pending Success Modal popup
                 document.getElementById('success-status-modal').style.display = 'flex';
             }).catch(error => {
                 alert("Error saving order: " + error.message);
@@ -1650,12 +1661,18 @@
 
                 snapshot.forEach((doc) => {
                     let ord = doc.data();
-                    let isSuccessful = ord.status.includes('Successful') || ord.status.includes('Received');
+                    let statusColor = '#f59e0b'; // Pending
+                    if (ord.status.includes('Successful') || ord.status.includes('Received')) {
+                        statusColor = '#16a34a';
+                    } else if (ord.status.includes('Delivered')) {
+                        statusColor = '#2563eb';
+                    }
+
                     feed.innerHTML += `
                         <div class="order-card">
                             <div style="display:flex; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:5px;">
                                 <strong style="font-size:0.88rem; color:#1b365d;">Order ID: ${ord.id}</strong>
-                                <span style="font-size:0.78rem; color: ${isSuccessful ? '#16a34a' : '#f59e0b'}; font-weight:bold;">${ord.status}</span>
+                                <span style="font-size:0.78rem; color: ${statusColor}; font-weight:bold;">${ord.status}</span>
                             </div>
                             <p style="font-size:0.82rem; margin-bottom:4px;"><strong>Items:</strong> ${ord.items}</p>
                             <p style="font-size:0.82rem; margin-bottom:4px;"><strong>Total:</strong> ${ord.total}</p>
@@ -1748,14 +1765,26 @@
         }
 
         function loadAdminOrders() {
+            // Global query fetching all customer orders ordered by newest first
             db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
                 const tbody = document.getElementById('admin-orders-body');
                 tbody.innerHTML = '';
                 
+                if (snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#64748b;">No global orders found yet.</td></tr>';
+                    return;
+                }
+
                 snapshot.forEach((doc) => {
                     let ord = doc.data();
                     let docId = doc.id;
-                    let isSuccessful = ord.status.includes('Successful') || ord.status.includes('Received');
+                    let statusText = ord.status || 'Pending';
+                    let statusColor = '#f59e0b';
+                    if (statusText.includes('Successful') || statusText.includes('Received')) {
+                        statusColor = '#16a34a';
+                    } else if (statusText.includes('Delivered')) {
+                        statusColor = '#2563eb';
+                    }
 
                     tbody.innerHTML += `
                         <tr>
@@ -1765,9 +1794,10 @@
                             <td>${ord.address || 'N/A'}</td>
                             <td>${ord.items}</td>
                             <td>${ord.total}</td>
-                            <td style="color: ${isSuccessful ? '#16a34a' : '#f59e0b'}; font-weight:bold;">${ord.status}</td>
+                            <td style="color: ${statusColor}; font-weight:bold;">${statusText}</td>
                             <td>
-                                ${!isSuccessful ? `<button class="btn-approve" onclick="approvePayment('${docId}', '${ord.name}', '${ord.email}', '${ord.id}', '${ord.items}', '${ord.total}')">Mark Success</button>` : 'Verified'}
+                                <button class="btn-approve" onclick="approvePayment('${docId}', '${ord.name}', '${ord.email}', '${ord.id}', '${ord.items}', '${ord.total}')">Mark Success</button>
+                                <button class="btn-deliver" onclick="markDelivered('${docId}')">Mark Delivered</button>
                             </td>
                         </tr>
                     `;
@@ -1790,6 +1820,16 @@
                 }, (error) => {
                     alert('Status updated in Firestore, but email failed: ' + JSON.stringify(error));
                 });
+            });
+        }
+
+        function markDelivered(docId) {
+            db.collection("orders").doc(docId).update({
+                status: 'Delivered 📦'
+            }).then(() => {
+                alert('Order marked as Delivered successfully! Customers can now see it on their dashboard.');
+            }).catch(error => {
+                alert('Error updating status: ' + error.message);
             });
         }
 
