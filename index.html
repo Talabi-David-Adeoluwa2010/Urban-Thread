@@ -8,7 +8,7 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
         (function() {
-            emailjs.init("VlUqN2N3V1d8YTR3ZQ==");
+            emailjs.init("yd2vB_gHk7NOdjwNO");
         })();
     </script>
     <!-- Firebase SDKs -->
@@ -1878,6 +1878,7 @@
             }
 
             db.collection("orders").add(pendingOrderData).then(() => {
+                // EmailJS integration with your Service ID and Public Key
                 emailjs.send("service_hw42hco", "template_order_success", {
                     to_name: pendingOrderData.name,
                     to_email: pendingOrderData.email,
@@ -1886,7 +1887,7 @@
                     order_total: pendingOrderData.total,
                     sender_name: pendingOrderData.senderName,
                     delivery_address: pendingOrderData.address
-                }).then(() => {
+                }, "yd2vB_gHk7NOdjwNO").then(() => {
                     console.log("Payment notification email sent successfully.");
                 }, (emailError) => {
                     console.warn("Order saved to database, but automated email failed to send: ", emailError);
