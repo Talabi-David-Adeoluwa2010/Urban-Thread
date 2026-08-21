@@ -11,6 +11,9 @@
             emailjs.init("yd2vB_gHk7NOdjwNO");
         })();
     </script>
+    <!-- Firebase App (Compat) and Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
     <style>
         :root {
             --bg-color: #f7f4ed;
@@ -494,6 +497,7 @@
             opacity: 0.25;
             text-decoration: line-through;
             cursor: not-allowed;
+            pointer-events: none;
         }
 
         .btn-add-cart {
@@ -651,7 +655,7 @@
             margin-bottom: 10px;
         }
 
-        #auth-modal, #checkout-modal, #payment-continuation-modal, #success-status-modal, #admin-modal, #admin-add-product-modal, #product-img-modal {
+        #auth-modal, #checkout-modal, #payment-continuation-modal, #success-status-modal, #admin-modal, #admin-add-product-modal, #product-img-modal, #loading-sync-modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -1306,6 +1310,15 @@
             </div>
         </div>
 
+        <!-- LOADING 6-SECOND SYNC MODAL -->
+        <div id="loading-sync-modal">
+            <div class="pay-modal-box" style="max-width: 320px; text-align: center; padding: 30px;">
+                <div style="font-size: 2.5rem; margin-bottom: 12px; animation: spin 1.5s linear infinite;">⏳</div>
+                <h3 style="color:#1b365d; font-size:1.05rem; margin-bottom:8px;">Verifying Payment...</h3>
+                <p style="color:#64748b; font-size:0.78rem;">Please wait while we sync your payment notification globally across devices.</p>
+            </div>
+        </div>
+
         <!-- PENDING SUCCESS NOTIFICATION MODAL -->
         <div id="success-status-modal">
             <div class="pay-modal-box">
@@ -1447,6 +1460,21 @@
     </div>
 
     <script>
+        // --- FIREBASE CONFIGURATION & INITIALIZATION ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDummyKeyForUrbanThreadApp",
+            authDomain: "urban-thread-app.firebaseapp.com",
+            projectId: "urban-thread-app",
+            storageBucket: "urban-thread-app.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             const store = document.getElementById('main-store');
@@ -1468,6 +1496,46 @@
         // Carousel State Variables
         let currentModalImages = [];
         let currentImageIndex = 0;
+
+        // Realtime Global Firestore Listeners
+        window.addEventListener('DOMContentLoaded', () => {
+            initRealtimeListeners();
+        });
+
+        function initRealtimeListeners() {
+            // Listen to Products Globally
+            db.collection("products").onSnapshot((snapshot) => {
+                let products = [];
+                snapshot.forEach((doc) => {
+                    products.push({ id: doc.id, ...doc.data() });
+                });
+                renderProducts(products);
+                renderAdminProductsTable(products);
+            });
+
+            // Listen to Reviews Globally
+            db.collection("reviews").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+                let reviews = [];
+                snapshot.forEach((doc) => {
+                    reviews.push({ id: doc.id, ...doc.data() });
+                });
+                renderReviews(reviews);
+            });
+
+            // Listen to Orders Globally
+            db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+                let orders = [];
+                snapshot.forEach((doc) => {
+                    orders.push({ id: doc.id, ...doc.data() });
+                });
+                if (currentUser && document.getElementById('orders-view').style.display === 'block') {
+                    renderMyOrders(orders);
+                }
+                if (document.getElementById('admin-dashboard').style.display === 'block') {
+                    renderAdminOrdersTable(orders);
+                }
+            });
+        }
 
         function aiAnswer(type) {
             const box = document.getElementById('ai-response-box');
@@ -1537,7 +1605,7 @@
                 return;
             }
 
-            currentUser = { uid: 'mock-user-id-' + Date.now(), email: email };
+            currentUser = { uid: 'user-' + Date.now(), email: email };
             updateAuthUI();
             alert(isSignUpMode ? 'Account created successfully!' : 'Signed in successfully!');
             closeAuthModal();
@@ -1564,7 +1632,6 @@
             } else if (page === 'reviews') {
                 reviewsView.style.display = 'block';
                 navReviews.classList.add('active');
-                loadReviews();
             } else if (page === 'orders') {
                 if (!currentUser) {
                     alert('Please sign in to view your orders.');
@@ -1573,7 +1640,11 @@
                 }
                 ordersView.style.display = 'block';
                 if (navOrders) navOrders.classList.add('active');
-                loadMyOrders();
+                db.collection("orders").orderBy("timestamp", "desc").get().then(snapshot => {
+                    let orders = [];
+                    snapshot.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
+                    renderMyOrders(orders);
+                });
             }
         }
 
@@ -1616,9 +1687,41 @@
             });
         }
 
-        function loadProducts() {
+        function renderProducts(products) {
             const grid = document.getElementById('product-grid-container');
-            grid.innerHTML = '<p style="color:#64748b; font-size:0.88rem; text-align:center; grid-column:1/-1;">No products found in store yet. Add some from the Admin panel!</p>';
+            if (!products || products.length === 0) {
+                grid.innerHTML = '<p style="color:#64748b; font-size:0.88rem; text-align:center; grid-column:1/-1;">No products found in store yet. Add some from the Admin panel!</p>';
+                return;
+            }
+
+            grid.innerHTML = '';
+            products.forEach(prod => {
+                let images = prod.images || [prod.image];
+                let primaryImg = images[0] || '';
+                let sizes = prod.sizes || {}; // e.g. { S: true, M: false (out of stock), ... }
+
+                let sizeButtonsHTML = '';
+                for (let size in sizes) {
+                    let isOut = sizes[size] === false;
+                    let outClass = isOut ? 'out-of-stock' : '';
+                    sizeButtonsHTML += `<button class="size-btn ${outClass}" onclick="selectSize('${prod.id}', '${size}', this)">${size}</button>`;
+                }
+
+                grid.innerHTML += `
+                    <div class="product-card">
+                        <div>
+                            <img src="${primaryImg}" class="product-img" alt="${prod.name}" onclick="openProductImageModal(${JSON.stringify(images).replace(/"/g, '&quot;')}, '${prod.name}')">
+                            <h3 class="product-name">${prod.name}</h3>
+                            <p class="product-desc">${prod.desc || ''}</p>
+                            <div class="product-price">${prod.price}</div>
+                            <div class="size-selector" id="sizes-${prod.id}">
+                                ${sizeButtonsHTML}
+                            </div>
+                        </div>
+                        <button class="btn-add-cart" onclick="addToCart('${prod.id}', '${prod.name}', '${prod.price}', '${primaryImg}')">Add to Cart</button>
+                    </div>
+                `;
+            });
         }
 
         function selectSize(productId, size, btnElement) {
@@ -1749,7 +1852,8 @@
                 senderName: senderName,
                 items: cart.map(c => `${c.name} [Size: ${c.selectedSize}] (Qty: ${c.quantity})`).join(', '),
                 total: '₦' + totalAmount.toLocaleString(),
-                status: 'Payment Pending'
+                status: 'Payment Pending',
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
 
             isSubmittingOrder = false;
@@ -1798,22 +1902,42 @@
                 btn.style.cursor = 'not-allowed';
             }
 
-            emailjs.send("service_hw42hco", "template_order_success", {
-                to_name: pendingOrderData.name,
-                to_email: pendingOrderData.email,
-                order_id: pendingOrderData.id,
-                order_items: pendingOrderData.items,
-                order_total: pendingOrderData.total,
-                sender_name: pendingOrderData.senderName,
-                delivery_address: pendingOrderData.address
-            }, "yd2vB_gHk7NOdjwNO").then(() => {
-                console.log("Payment notification email sent successfully.");
-            }, (emailError) => {
-                console.warn("Automated email failed to send: ", emailError);
-            });
+            // Save order to Firestore globally
+            db.collection("orders").doc(pendingOrderData.id).set(pendingOrderData).then(() => {
+                // Send Email via EmailJS
+                emailjs.send("service_hw42hco", "template_order_success", {
+                    to_name: pendingOrderData.name,
+                    to_email: pendingOrderData.email,
+                    order_id: pendingOrderData.id,
+                    order_items: pendingOrderData.items,
+                    order_total: pendingOrderData.total,
+                    sender_name: pendingOrderData.senderName,
+                    delivery_address: pendingOrderData.address
+                }, "yd2vB_gHk7NOdjwNO").then(() => {
+                    console.log("Payment notification email sent successfully.");
+                }, (emailError) => {
+                    console.warn("Automated email failed to send: ", emailError);
+                });
 
-            closePaymentContinuation();
-            document.getElementById('success-status-modal').style.display = 'flex';
+                closePaymentContinuation();
+                
+                // Show 6-second loading sync screen before showing pending success status modal
+                document.getElementById('loading-sync-modal').style.display = 'flex';
+                setTimeout(() => {
+                    document.getElementById('loading-sync-modal').style.display = 'none';
+                    document.getElementById('success-status-modal').style.display = 'flex';
+                }, 6000);
+
+            }).catch(err => {
+                alert('Error submitting order: ' + err.message);
+                isSubmittingOrder = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = 'I have made the payment';
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                }
+            });
         }
 
         function redirectToOrdersTab() {
@@ -1824,14 +1948,57 @@
             switchPage('orders');
         }
 
-        function loadMyOrders() {
+        function renderMyOrders(orders) {
             const feed = document.getElementById('my-orders-feed');
-            feed.innerHTML = '<p style="color:#64748b; font-size:0.88rem;">No orders recorded yet.</p>';
+            if (!currentUser) return;
+
+            let userOrders = orders.filter(o => o.userId === currentUser.uid);
+
+            if (userOrders.length === 0) {
+                feed.innerHTML = '<p style="color:#64748b; font-size:0.88rem;">No orders recorded yet.</p>';
+                return;
+            }
+
+            feed.innerHTML = '';
+            userOrders.forEach(o => {
+                let badgeColor = '#d97706';
+                if (o.status === 'Payment Received') badgeColor = '#2563eb';
+                if (o.status === 'Delivered') badgeColor = '#16a34a';
+
+                feed.innerHTML += `
+                    <div class="order-card">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; align-items:center; flex-wrap:wrap;">
+                            <h4 style="font-size:0.95rem; color:#1b365d;">Order ID: ${o.id}</h4>
+                            <span style="background:${badgeColor}; color:#fff; padding:4px 10px; border-radius:12px; font-size:0.72rem; font-weight:bold; text-transform:uppercase;">${o.status}</span>
+                        </div>
+                        <p style="font-size:0.82rem; color:#475569; margin-bottom:4px;"><strong>Items:</strong> ${o.items}</p>
+                        <p style="font-size:0.82rem; color:#475569; margin-bottom:4px;"><strong>Total Amount:</strong> ${o.total}</p>
+                        <p style="font-size:0.82rem; color:#475569; margin-bottom:4px;"><strong>Delivery Address:</strong> ${o.address}</p>
+                        <p style="font-size:0.78rem; color:#64748b;"><strong>Sender Name:</strong> ${o.senderName}</p>
+                    </div>
+                `;
+            });
         }
 
-        function loadReviews() {
+        function renderReviews(reviews) {
             const feed = document.getElementById('reviews-feed');
-            feed.innerHTML = '<p style="color:#64748b; font-size:0.88rem;">No reviews yet.</p>';
+            if (!reviews || reviews.length === 0) {
+                feed.innerHTML = '<p style="color:#64748b; font-size:0.88rem;">No reviews yet. Be the first to leave feedback!</p>';
+                return;
+            }
+
+            feed.innerHTML = '';
+            reviews.forEach(r => {
+                feed.innerHTML += `
+                    <div class="review-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                            <h4 style="font-size:0.9rem; color:#1b365d; text-transform:uppercase;">${r.name}</h4>
+                            <span style="color:var(--accent-gold); font-size:0.85rem;">${r.rating}</span>
+                        </div>
+                        <p style="font-size:0.82rem; color:#475569; line-height:1.4;">${r.comment}</p>
+                    </div>
+                `;
+            });
         }
 
         function submitReview() {
@@ -1850,9 +2017,18 @@
                 return;
             }
 
-            alert('Review submitted successfully!');
-            document.getElementById('rev-name').value = '';
-            document.getElementById('rev-comment').value = '';
+            db.collection("reviews").add({
+                name: name,
+                rating: rating,
+                comment: comment,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                alert('Review submitted and synced globally!');
+                document.getElementById('rev-name').value = '';
+                document.getElementById('rev-comment').value = '';
+            }).catch(err => {
+                alert('Error submitting review: ' + err.message);
+            });
         }
 
         function openAdminModalDirect() {
@@ -1869,8 +2045,16 @@
                 closeAdminModal();
                 document.getElementById('main-store').style.display = 'none';
                 document.getElementById('admin-dashboard').style.display = 'block';
-                loadAdminOrders();
-                loadAdminProducts();
+                db.collection("orders").orderBy("timestamp", "desc").get().then(snap => {
+                    let orders = [];
+                    snap.forEach(d => orders.push({ id: d.id, ...d.data() }));
+                    renderAdminOrdersTable(orders);
+                });
+                db.collection("products").get().then(snap => {
+                    let prods = [];
+                    snap.forEach(d => prods.push({ id: d.id, ...d.data() }));
+                    renderAdminProductsTable(prods);
+                });
             } else {
                 alert('Incorrect Admin Password');
             }
@@ -1942,25 +2126,136 @@
                 return;
             }
 
-            alert('Product details received successfully! (Database storage is currently disabled)');
-            closeAddProductModal();
-            document.getElementById('new-prod-name').value = '';
-            document.getElementById('new-prod-price').value = '';
-            document.getElementById('new-prod-desc').value = '';
-            document.getElementById('new-prod-img-files').value = '';
+            let compressedImages = [];
+            for (let i = 0; i < fileInput.files.length; i++) {
+                let compressed = await compressImage(fileInput.files[i]);
+                compressedImages.push(compressed);
+            }
+
+            let sizesObj = {};
+            document.querySelectorAll('input[name="new-size"]:checked').forEach(cb => {
+                sizesObj[cb.value] = true; // true = in stock
+            });
+
+            db.collection("products").add({
+                name: name,
+                price: price,
+                desc: desc,
+                images: compressedImages,
+                image: compressedImages[0],
+                sizes: sizesObj,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                alert('Product published and synced globally across all devices!');
+                closeAddProductModal();
+                document.getElementById('new-prod-name').value = '';
+                document.getElementById('new-prod-price').value = '';
+                document.getElementById('new-prod-desc').value = '';
+                document.getElementById('new-prod-img-files').value = '';
+            }).catch(err => {
+                alert('Error publishing product: ' + err.message);
+            });
         }
 
-        function loadAdminProducts() {
+        function renderAdminProductsTable(products) {
             const tbody = document.getElementById('admin-products-body');
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#64748b;">No products found in store.</td></tr>';
+            if (!products || products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#64748b;">No products found in store.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            products.forEach(p => {
+                let imgs = p.images || [p.image];
+                let thumbsHTML = imgs.map(img => `<img src="${img}" style="width:35px; height:35px; object-fit:cover; border-radius:3px; margin-right:3px;">`).join('');
+                
+                let sizesHTML = '';
+                let sizes = p.sizes || {};
+                for (let sz in sizes) {
+                    let inStock = sizes[sz] !== false;
+                    let btnColor = inStock ? '#16a34a' : '#dc2626';
+                    let btnText = inStock ? `${sz}: In Stock` : `${sz}: Out of Stock`;
+                    sizesHTML += `<button style="background:${btnColor}; color:#fff; border:none; padding:4px 8px; font-size:0.68rem; border-radius:3px; cursor:pointer; margin:2px;" onclick="toggleStockStatus('${p.id}', '${sz}', ${inStock})">${btnText}</button>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><div style="display:flex; flex-wrap:wrap; max-width:120px;">${thumbsHTML}</div></td>
+                        <td><strong>${p.name}</strong><br><small style="color:#64748b;">${p.desc || ''}</small></td>
+                        <td>${p.price}</td>
+                        <td>${sizesHTML}</td>
+                        <td>
+                            <button class="btn-danger" onclick="deleteStoreProduct('${p.id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
         }
 
-        function loadAdminOrders() {
+        function toggleStockStatus(productId, sizeKey, currentStatus) {
+            db.collection("products").doc(productId).get().then(doc => {
+                if (doc.exists) {
+                    let data = doc.data();
+                    let sizes = data.sizes || {};
+                    sizes[sizeKey] = !currentStatus; // flip stock status
+                    db.collection("products").doc(productId).update({ sizes: sizes });
+                }
+            });
+        }
+
+        function deleteStoreProduct(productId) {
+            if (confirm('Are you sure you want to delete this product? It will be removed globally from all devices.')) {
+                db.collection("products").doc(productId).delete().then(() => {
+                    alert('Product deleted successfully.');
+                });
+            }
+        }
+
+        function renderAdminOrdersTable(orders) {
             const tbody = document.getElementById('admin-orders-body');
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#64748b;">No global orders found yet.</td></tr>';
+            if (!orders || orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#64748b;">No global orders found yet.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            orders.forEach(o => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${o.id}</strong></td>
+                        <td>${o.name}<br><small>${o.email}</small><br><small>${o.phone}</small></td>
+                        <td><strong>${o.senderName}</strong></td>
+                        <td>${o.address}</td>
+                        <td>${o.items}</td>
+                        <td>${o.total}</td>
+                        <td><span style="font-weight:bold; color:#1b365d;">${o.status}</span></td>
+                        <td>
+                            <button class="btn-approve" onclick="updateOrderStatus('${o.id}', 'Payment Received')">Mark Payment Received</button>
+                            <button class="btn-deliver" onclick="updateOrderStatus('${o.id}', 'Delivered')">Mark Delivered</button>
+                            <button class="btn-danger" onclick="deleteOrder('${o.id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
         }
 
-        loadProducts();
+        function updateOrderStatus(orderId, newStatus) {
+            db.collection("orders").doc(orderId).update({
+                status: newStatus
+            }).then(() => {
+                alert(`Order ${orderId} status updated to "${newStatus}" and synced globally!`);
+            }).catch(err => {
+                alert('Error updating status: ' + err.message);
+            });
+        }
+
+        function deleteOrder(orderId) {
+            if (confirm('Are you sure you want to delete this order record?')) {
+                db.collection("orders").doc(orderId).delete().then(() => {
+                    alert('Order deleted successfully.');
+                });
+            }
+        }
     </script>
 </body>
 </html>
