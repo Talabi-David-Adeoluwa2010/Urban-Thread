@@ -2243,9 +2243,8 @@
             db.collection("orders").doc(orderId).update({
                 status: 'Payment Received'
             }).then(() => {
-                // FIXED: Included 'to_email' mapping correctly to customerEmail
                 emailjs.send("service_hw42hco", "template_order_success", {
-                    to_email: customerEmail,
+                    customer_email: customerEmail,
                     to_name: customerName,
                     order_id: orderId,
                     order_items: items,
