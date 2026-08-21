@@ -1907,7 +1907,6 @@
             }
 
             db.collection("orders").doc(pendingOrderData.id).set(pendingOrderData).then(() => {
-                // FIXED: Template parameters matching EmailJS template structure for Admin Notification
                 emailjs.send("service_hw42hco", "template_new_order", {
                     customer_name: pendingOrderData.name,
                     customer_email: pendingOrderData.email,
@@ -2244,7 +2243,7 @@
             db.collection("orders").doc(orderId).update({
                 status: 'Payment Received'
             }).then(() => {
-                // FIXED: Template parameters matching EmailJS template structure for Customer Confirmation
+                // FIXED: Included 'to_email' mapping correctly to customerEmail
                 emailjs.send("service_hw42hco", "template_order_success", {
                     to_email: customerEmail,
                     to_name: customerName,
