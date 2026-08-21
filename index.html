@@ -28,10 +28,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
-
-        db.enablePersistence().catch((err) => {
-            console.log('Persistence note: ', err.code);
-        });
+        // Offline persistence has been completely removed to enforce global online sync.
     </script>
     <style>
         :root {
@@ -1878,7 +1875,6 @@
             }
 
             db.collection("orders").add(pendingOrderData).then(() => {
-                // EmailJS integration with your Service ID and Public Key
                 emailjs.send("service_hw42hco", "template_order_success", {
                     to_name: pendingOrderData.name,
                     to_email: pendingOrderData.email,
@@ -2068,7 +2064,7 @@
                         let width = img.width;
                         let height = img.height;
                         
-                        let maxDimension = 800; // Scaled down safely for Firestore 1MB document limit
+                        let maxDimension = 800;
                         if (width > maxDimension || height > maxDimension) {
                             if (width > height) {
                                 height = Math.round((height *= maxDimension / width));
@@ -2106,7 +2102,6 @@
         }
 
         async function saveNewProductToFirestore() {
-            console.log("Starting product save process...");
             let name = document.getElementById('new-prod-name').value;
             let price = document.getElementById('new-prod-price').value;
             let desc = document.getElementById('new-prod-desc').value;
@@ -2147,7 +2142,6 @@
         }
 
         function pushProductToDb(name, price, description, images, sizes, stockStatus) {
-            console.log("Attempting to write product to Firestore:", name);
             db.collection("products").add({
                 name,
                 price,
@@ -2158,7 +2152,6 @@
                 stockStatus,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             }).then((docRef) => {
-                console.log("Product published successfully! Document ID:", docRef.id);
                 alert('Product published successfully!');
                 closeAddProductModal();
                 document.getElementById('new-prod-name').value = '';
@@ -2166,8 +2159,6 @@
                 document.getElementById('new-prod-desc').value = '';
                 document.getElementById('new-prod-img-files').value = '';
             }).catch(error => {
-                console.error("Sync Error publishing product to Firestore:", error);
-                // This popup will show the exact error on your tablet screen
                 alert('FIREBASE ERROR: ' + error.code + '\n\nMESSAGE: ' + error.message);
             });
         }
