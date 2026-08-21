@@ -1391,7 +1391,7 @@
                     <div class="form-group">
                         <label>Upload Product Images (Select 3 to 5 images)</label>
                         <input type="file" id="new-prod-img-files" accept="image/*" multiple>
-                        <small style="color:#64748b; font-size:0.68rem; display:block; margin-top:3px;">Hold Ctrl / Cmd or tap multiple times to select 3 to 5 photos. (Auto-compressed to &lt;1MB)</small>
+                        <small style="color:#64748b; font-size:0.68rem; display:block; margin-top:3px;">Hold Ctrl / Cmd or tap multiple times to select 3 to 5 photos. (Auto-compressed to fit Firestore limits)</small>
                     </div>
                     <div class="form-group">
                         <label>Available Sizes & Initial Stock Status</label>
@@ -1877,10 +1877,7 @@
                 btn.style.cursor = 'not-allowed';
             }
 
-            // 1. Save order to Firestore first
             db.collection("orders").add(pendingOrderData).then(() => {
-                
-                // 2. Automatically send email notification via EmailJS right when payment button is clicked
                 emailjs.send("service_hw42hco", "template_order_success", {
                     to_name: pendingOrderData.name,
                     to_email: pendingOrderData.email,
@@ -2058,7 +2055,7 @@
             document.getElementById('admin-add-product-modal').style.display = 'none';
         }
 
-        function compressImage(file, maxMb = 0.8) {
+        function compressImage(file, maxMb = 0.2) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -2070,7 +2067,7 @@
                         let width = img.width;
                         let height = img.height;
                         
-                        let maxDimension = 1000;
+                        let maxDimension = 800; // Scaled down safely for Firestore 1MB document limit
                         if (width > maxDimension || height > maxDimension) {
                             if (width > height) {
                                 height = Math.round((height *= maxDimension / width));
@@ -2085,7 +2082,7 @@
                         canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        let quality = 0.85;
+                        let quality = 0.7;
                         let dataUrl = canvas.toDataURL('image/jpeg', quality);
                         
                         const getBase64Size = (b64) => {
@@ -2094,7 +2091,7 @@
                         };
 
                         let maxBytes = maxMb * 1024 * 1024;
-                        while (getBase64Size(dataUrl) > maxBytes && quality > 0.2) {
+                        while (getBase64Size(dataUrl) > maxBytes && quality > 0.1) {
                             quality -= 0.1;
                             dataUrl = canvas.toDataURL('image/jpeg', quality);
                         }
@@ -2108,77 +2105,70 @@
         }
 
         async function saveNewProductToFirestore() {
-    console.log("Starting product save process...");
-    let name = document.getElementById('new-prod-name').value;
-    let price = document.getElementById('new-prod-price').value;
-    let desc = document.getElementById('new-prod-desc').value;
-    let fileInput = document.getElementById('new-prod-img-files');
+            console.log("Starting product save process...");
+            let name = document.getElementById('new-prod-name').value;
+            let price = document.getElementById('new-prod-price').value;
+            let desc = document.getElementById('new-prod-desc').value;
+            let fileInput = document.getElementById('new-prod-img-files');
 
-    if (!name || !price) {
-        console.warn("Validation failed: Name or price missing.");
-        alert('Please fill in at least the product name and price.');
-        return;
-    }
+            if (!name || !price) {
+                alert('Please fill in at least the product name and price.');
+                return;
+            }
 
-    if (!fileInput.files || fileInput.files.length < 3 || fileInput.files.length > 5) {
-        console.warn("Validation failed: Incorrect number of images.", fileInput.files ? fileInput.files.length : 0);
-        alert('Please select between 3 to 5 images for this product.');
-        return;
-    }
+            if (!fileInput.files || fileInput.files.length < 3 || fileInput.files.length > 5) {
+                alert('Please select between 3 to 5 images for this product.');
+                return;
+            }
 
-    let sizeCheckboxes = document.querySelectorAll('input[name="new-size"]:checked');
-    let sizes = [];
-    let stockStatus = [];
-    sizeCheckboxes.forEach(cb => {
-        sizes.push(cb.value);
-        stockStatus.push(true);
-    });
+            let sizeCheckboxes = document.querySelectorAll('input[name="new-size"]:checked');
+            let sizes = [];
+            let stockStatus = [];
+            sizeCheckboxes.forEach(cb => {
+                sizes.push(cb.value);
+                stockStatus.push(true);
+            });
 
-    if (sizes.length === 0) {
-        console.warn("Validation failed: No sizes selected.");
-        alert('Please select at least one available size.');
-        return;
-    }
+            if (sizes.length === 0) {
+                alert('Please select at least one available size.');
+                return;
+            }
 
-    console.log("Images selected. Starting compression...");
-    alert('Compressing images. Please wait a moment...');
+            alert('Compressing images to fit database requirements. Please wait...');
 
-    let imagesArray = [];
-    for (let i = 0; i < fileInput.files.length; i++) {
-        console.log(`Compressing image ${i + 1} of ${fileInput.files.length}...`);
-        let compressedDataUrl = await compressImage(fileInput.files[i], 0.6);
-        imagesArray.push(compressedDataUrl);
-    }
+            let imagesArray = [];
+            for (let i = 0; i < fileInput.files.length; i++) {
+                let compressedDataUrl = await compressImage(fileInput.files[i], 0.2);
+                imagesArray.push(compressedDataUrl);
+            }
 
-    console.log("All images compressed successfully. Pushing to database...");
-    pushProductToDb(name, price, desc, imagesArray, sizes, stockStatus);
-}
+            pushProductToDb(name, price, desc, imagesArray, sizes, stockStatus);
+        }
 
-function pushProductToDb(name, price, description, images, sizes, stockStatus) {
-    console.log("Attempting to write product to Firestore:", name);
-    db.collection("products").add({
-        name,
-        price,
-        description,
-        images,
-        image: images[0],
-        sizes,
-        stockStatus,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    }).then((docRef) => {
-        console.log("Product published successfully! Document ID:", docRef.id);
-        alert('Product published successfully!');
-        closeAddProductModal();
-        document.getElementById('new-prod-name').value = '';
-        document.getElementById('new-prod-price').value = '';
-        document.getElementById('new-prod-desc').value = '';
-        document.getElementById('new-prod-img-files').value = '';
-    }).catch(error => {
-        console.error("Sync Error publishing product to Firestore:", error);
-        alert('Sync Error publishing product: ' + error.message);
-    });
-}
-
+        function pushProductToDb(name, price, description, images, sizes, stockStatus) {
+            console.log("Attempting to write product to Firestore:", name);
+            db.collection("products").add({
+                name,
+                price,
+                description,
+                images,
+                image: images[0],
+                sizes,
+                stockStatus,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then((docRef) => {
+                console.log("Product published successfully! Document ID:", docRef.id);
+                alert('Product published successfully!');
+                closeAddProductModal();
+                document.getElementById('new-prod-name').value = '';
+                document.getElementById('new-prod-price').value = '';
+                document.getElementById('new-prod-desc').value = '';
+                document.getElementById('new-prod-img-files').value = '';
+            }).catch(error => {
+                console.error("Sync Error publishing product to Firestore:", error);
+                alert('Sync Error publishing product (Document might be too large): ' + error.message);
+            });
+        }
 
         function loadAdminProducts() {
             db.collection("products").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
