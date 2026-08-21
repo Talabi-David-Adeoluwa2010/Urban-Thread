@@ -8,7 +8,7 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
         (function() {
-            emailjs.init("yd2vB_gHk7NOdJwNO");
+            emailjs.init("yd2vB_gHk7NOdjwNO");
         })();
     </script>
     <!-- Firebase App (Compat) and Firestore -->
@@ -1128,7 +1128,7 @@
                         </div>
 
                         <div class="admin-contact-box">
-                            <p>⚠️ Having issues or errors? Contact Admin: <strong>08024300891</strong></p>
+                            <p>⚠️ Having issues or errors? Contact Customer Service / Admin: <strong>0706 691 8121</strong></p>
                         </div>
                     </div>
 
@@ -1304,7 +1304,8 @@
 
                     <div class="pay-footer-note">
                         If you have any questions, connect us by email.<br>
-                        Email address: <a href="mailto:urbanthread@gmail.com">urbanthread@gmail.com</a>
+                        Email address: <a href="mailto:uthread3@gmail.com">uthread3@gmail.com</a><br>
+                        Customer Service: <strong>0706 691 8121</strong>
                     </div>
                 </div>
             </div>
@@ -1364,7 +1365,7 @@
                     <button class="pay-banner-close" onclick="closeAddProductModal()">&times;</button>
                     <div class="pay-banner-title">Inventory Control</div>
                     <div class="pay-banner-amount" style="font-size: 1.2rem;">New Product Drop</div>
-                    <div class="pay-banner-subtitle">Upload 3 to 5 Images</div>
+                    <div class="pay-banner-subtitle">Upload 1 to 5 Images</div>
                 </div>
                 <div class="pay-body">
                     <div class="form-group">
@@ -1380,9 +1381,9 @@
                         <textarea id="new-prod-desc" rows="2" placeholder="Describe the material, fit, and style..."></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Upload Product Images (Select 3 to 5 images)</label>
+                        <label>Upload Product Images (Select 1 to 5 images)</label>
                         <input type="file" id="new-prod-img-files" accept="image/*" multiple>
-                        <small style="color:#64748b; font-size:0.68rem; display:block; margin-top:3px;">Hold Ctrl / Cmd or tap multiple times to select 3 to 5 photos.</small>
+                        <small style="color:#64748b; font-size:0.68rem; display:block; margin-top:3px;">Select 1 to 5 photos from your device.</small>
                     </div>
                     <div class="form-group">
                         <label>Available Sizes & Initial Stock Status</label>
@@ -1499,6 +1500,12 @@
 
         // Realtime Global Firestore Listeners
         window.addEventListener('DOMContentLoaded', () => {
+            // Check persistent login
+            const savedUser = localStorage.getItem('urban_thread_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+            }
+            updateAuthUI();
             initRealtimeListeners();
         });
 
@@ -1554,6 +1561,7 @@
             if (currentUser) {
                 if (confirm('Are you sure you want to log out?')) {
                     currentUser = null;
+                    localStorage.removeItem('urban_thread_user');
                     updateAuthUI();
                     alert('Logged out successfully.');
                     switchPage('home');
@@ -1606,6 +1614,7 @@
             }
 
             currentUser = { uid: 'user-' + Date.now(), email: email };
+            localStorage.setItem('urban_thread_user', JSON.stringify(currentUser));
             updateAuthUI();
             alert(isSignUpMode ? 'Account created successfully!' : 'Signed in successfully!');
             closeAuthModal();
@@ -1904,21 +1913,6 @@
 
             // Save order to Firestore globally
             db.collection("orders").doc(pendingOrderData.id).set(pendingOrderData).then(() => {
-                // Send Email via EmailJS
-                emailjs.send("service_hw42hco", "template_order_success", {
-                    to_name: pendingOrderData.name,
-                    to_email: pendingOrderData.email,
-                    order_id: pendingOrderData.id,
-                    order_items: pendingOrderData.items,
-                    order_total: pendingOrderData.total,
-                    sender_name: pendingOrderData.senderName,
-                    delivery_address: pendingOrderData.address
-                }, "yd2vB_gHk7NOdjwNO").then(() => {
-                    console.log("Payment notification email sent successfully.");
-                }, (emailError) => {
-                    console.warn("Automated email failed to send: ", emailError);
-                });
-
                 closePaymentContinuation();
                 
                 // Show 6-second loading sync screen before showing pending success status modal
@@ -2121,8 +2115,8 @@
                 return;
             }
 
-            if (!fileInput.files || fileInput.files.length < 3 || fileInput.files.length > 5) {
-                alert('Please select between 3 to 5 images for this product.');
+            if (!fileInput.files || fileInput.files.length < 1 || fileInput.files.length > 5) {
+                alert('Please select between 1 to 5 images for this product.');
                 return;
             }
 
@@ -2230,12 +2224,35 @@
                         <td>${o.total}</td>
                         <td><span style="font-weight:bold; color:#1b365d;">${o.status}</span></td>
                         <td>
-                            <button class="btn-approve" onclick="updateOrderStatus('${o.id}', 'Payment Received')">Mark Payment Received</button>
+                            <button class="btn-approve" onclick="approveAndSendEmail('${o.id}', '${o.name}', '${o.email}', '${o.items}', '${o.total}', '${o.address}')">Mark Payment Received</button>
                             <button class="btn-deliver" onclick="updateOrderStatus('${o.id}', 'Delivered')">Mark Delivered</button>
                             <button class="btn-danger" onclick="deleteOrder('${o.id}')">Delete</button>
                         </td>
                     </tr>
                 `;
+            });
+        }
+
+        function approveAndSendEmail(orderId, customerName, customerEmail, items, total, address) {
+            // 1. Update Firestore Order Status to "Payment Received"
+            db.collection("orders").doc(orderId).update({
+                status: 'Payment Received'
+            }).then(() => {
+                // 2. Send Email via EmailJS automatically upon admin approval
+                emailjs.send("service_hw42hco", "template_order_success", {
+                    to_name: customerName,
+                    to_email: customerEmail,
+                    order_id: orderId,
+                    order_items: items,
+                    order_total: total,
+                    delivery_address: address
+                }, "yd2vB_gHk7NOdjwNO").then(() => {
+                    alert(`Order ${orderId} marked as Payment Received and confirmation email sent to customer successfully!`);
+                }, (error) => {
+                    alert(`Order status updated to Payment Received, but email dispatch failed: ${error.text}`);
+                });
+            }).catch(err => {
+                alert('Error updating status: ' + err.message);
             });
         }
 
