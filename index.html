@@ -1911,8 +1911,22 @@
                 btn.style.cursor = 'not-allowed';
             }
 
-            // Save order to Firestore globally
+            // Save order to Firestore globally & trigger Admin Email via EmailJS
             db.collection("orders").doc(pendingOrderData.id).set(pendingOrderData).then(() => {
+                // Send new order notification email to admin using service_hw42hco (to_email removed from object)
+                emailjs.send("service_hw42hco", "template_new_order", {
+                    customer_name: pendingOrderData.name,
+                    customer_email: pendingOrderData.email,
+                    customer_phone: pendingOrderData.phone,
+                    order_id: pendingOrderData.id,
+                    order_items: pendingOrderData.items,
+                    order_total: pendingOrderData.total,
+                    delivery_address: pendingOrderData.address,
+                    sender_name: pendingOrderData.senderName
+                }, "yd2vB_gHk7NOdjwNO").catch(err => {
+                    console.log("Admin email dispatch warning:", err.text);
+                });
+
                 closePaymentContinuation();
                 
                 // Show 6-second loading sync screen before showing pending success status modal
@@ -2238,10 +2252,9 @@
             db.collection("orders").doc(orderId).update({
                 status: 'Payment Received'
             }).then(() => {
-                // 2. Send Email via EmailJS automatically upon admin approval
+                // 2. Send Email via EmailJS automatically upon admin approval (to_email removed)
                 emailjs.send("service_hw42hco", "template_order_success", {
                     to_name: customerName,
-                    to_email: customerEmail,
                     order_id: orderId,
                     order_items: items,
                     order_total: total,
