@@ -11,25 +11,6 @@
             emailjs.init("yd2vB_gHk7NOdjwNO");
         })();
     </script>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBsTBY0xlLSmUjKZdUjSrC-l5DMfXOwbEc",
-            authDomain: "urban-threads-store-d9a06.firebaseapp.com",
-            projectId: "urban-threads-store-d9a06",
-            storageBucket: "urban-threads-store-d9a06.appspot.com",
-            messagingSenderId: "594508118134",
-            appId: "1:594508118134:web:c784510b58eada58258757",
-            measurementId: "G-LXDBJ61QYX"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
-        // Offline persistence has been completely removed to enforce global online sync.
-    </script>
     <style>
         :root {
             --bg-color: #f7f4ed;
@@ -1388,7 +1369,7 @@
                     <div class="form-group">
                         <label>Upload Product Images (Select 3 to 5 images)</label>
                         <input type="file" id="new-prod-img-files" accept="image/*" multiple>
-                        <small style="color:#64748b; font-size:0.68rem; display:block; margin-top:3px;">Hold Ctrl / Cmd or tap multiple times to select 3 to 5 photos. (Auto-compressed to fit Firestore limits)</small>
+                        <small style="color:#64748b; font-size:0.68rem; display:block; margin-top:3px;">Hold Ctrl / Cmd or tap multiple times to select 3 to 5 photos.</small>
                     </div>
                     <div class="form-group">
                         <label>Available Sizes & Initial Stock Status</label>
@@ -1488,29 +1469,6 @@
         let currentModalImages = [];
         let currentImageIndex = 0;
 
-        auth.onAuthStateChanged((user) => {
-            currentUser = user;
-            const authBtn = document.getElementById('auth-btn-label');
-            const ordersNav = document.getElementById('nav-orders');
-            const greetingEl = document.getElementById('user-greeting');
-
-            if (user) {
-                authBtn.innerText = 'Logout';
-                ordersNav.style.display = 'block';
-                if (user.email) {
-                    const username = user.email.split('@')[0];
-                    greetingEl.innerText = `Hi, @${username}`;
-                } else {
-                    greetingEl.innerText = `Hi, @user`;
-                }
-                loadMyOrders();
-            } else {
-                authBtn.innerText = 'Sign In';
-                ordersNav.style.display = 'none';
-                greetingEl.innerText = 'Hi, @guest';
-            }
-        });
-
         function aiAnswer(type) {
             const box = document.getElementById('ai-response-box');
             if (type === 'signup') {
@@ -1527,13 +1485,30 @@
         function handleAuthClick() {
             if (currentUser) {
                 if (confirm('Are you sure you want to log out?')) {
-                    auth.signOut().then(() => {
-                        alert('Logged out successfully.');
-                        switchPage('home');
-                    });
+                    currentUser = null;
+                    updateAuthUI();
+                    alert('Logged out successfully.');
+                    switchPage('home');
                 }
             } else {
                 openAuthModal();
+            }
+        }
+
+        function updateAuthUI() {
+            const authBtn = document.getElementById('auth-btn-label');
+            const ordersNav = document.getElementById('nav-orders');
+            const greetingEl = document.getElementById('user-greeting');
+
+            if (currentUser) {
+                authBtn.innerText = 'Logout';
+                ordersNav.style.display = 'block';
+                const username = currentUser.email.split('@')[0];
+                greetingEl.innerText = `Hi, @${username}`;
+            } else {
+                authBtn.innerText = 'Sign In';
+                ordersNav.style.display = 'none';
+                greetingEl.innerText = 'Hi, @guest';
             }
         }
 
@@ -1562,25 +1537,10 @@
                 return;
             }
 
-            if (isSignUpMode) {
-                auth.createUserWithEmailAndPassword(email, password)
-                    .then(() => {
-                        alert('Account created successfully!');
-                        closeAuthModal();
-                    })
-                    .catch((error) => {
-                        alert('Invalid details or email already in use: ' + error.message);
-                    });
-            } else {
-                auth.signInWithEmailAndPassword(email, password)
-                    .then(() => {
-                        alert('Signed in successfully!');
-                        closeAuthModal();
-                    })
-                    .catch((error) => {
-                        alert('Invalid email or password: ' + error.message);
-                    });
-            }
+            currentUser = { uid: 'mock-user-id-' + Date.now(), email: email };
+            updateAuthUI();
+            alert(isSignUpMode ? 'Account created successfully!' : 'Signed in successfully!');
+            closeAuthModal();
         }
 
         function switchPage(page) {
@@ -1657,43 +1617,8 @@
         }
 
         function loadProducts() {
-            db.collection("products").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-                const grid = document.getElementById('product-grid-container');
-                grid.innerHTML = '';
-                
-                if (snapshot.empty) {
-                    grid.innerHTML = '<p style="color:#64748b; font-size:0.88rem; text-align:center; grid-column:1/-1;">No products found in store.</p>';
-                    return;
-                }
-
-                snapshot.forEach((doc) => {
-                    let p = doc.data();
-                    let pId = doc.id;
-                    let sizeButtons = '';
-                    
-                    let imagesList = p.images && p.images.length > 0 ? p.images : [p.image];
-                    let mainDisplayImg = imagesList[0];
-                    let escapedImages = JSON.stringify(imagesList).replace(/"/g, '&quot;');
-
-                    p.sizes.forEach((sz, idx) => {
-                        let isAvailable = p.stockStatus ? p.stockStatus[idx] : true;
-                        sizeButtons += `<button class="size-btn ${isAvailable ? '' : 'out-of-stock'}" onclick="selectSize('${pId}', '${sz}', this)">${sz}</button>`;
-                    });
-
-                    grid.innerHTML += `
-                        <div class="product-card">
-                            <img src="${mainDisplayImg}" class="product-img" alt="${p.name}" onclick="openProductImageModal(${escapedImages}, '${p.name}')">
-                            <div class="product-name">${p.name}</div>
-                            <div class="product-desc">${p.description || 'No description provided.'}</div>
-                            <div class="product-price">${p.price}</div>
-                            <div class="size-selector" id="sizes-${pId}">${sizeButtons}</div>
-                            <button class="btn-add-cart" onclick="addToCart('${pId}', '${p.name}', '${p.price}', '${mainDisplayImg}')">Add to Cart</button>
-                        </div>
-                    `;
-                });
-            }, (error) => {
-                console.error("Error loading products: ", error);
-            });
+            const grid = document.getElementById('product-grid-container');
+            grid.innerHTML = '<p style="color:#64748b; font-size:0.88rem; text-align:center; grid-column:1/-1;">No products found in store yet. Add some from the Admin panel!</p>';
         }
 
         function selectSize(productId, size, btnElement) {
@@ -1747,7 +1672,7 @@
             let subtotal = 0;
 
             cart.forEach((item, index) => {
-                let itemPriceNum = parseInt(item.price.replace(/[^\d]/g, ''));
+                let itemPriceNum = parseInt(item.price.replace(/[^\d]/g, '')) || 0;
                 subtotal += itemPriceNum * item.quantity;
 
                 container.innerHTML += `
@@ -1811,7 +1736,7 @@
             }
 
             let orderId = 'UT-' + Math.floor(100000 + Math.random() * 900000);
-            let totalAmount = cart.reduce((sum, item) => sum + (parseInt(item.price.replace(/[^\d]/g, '')) * item.quantity), 0);
+            let totalAmount = cart.reduce((sum, item) => sum + ((parseInt(item.price.replace(/[^\d]/g, '')) || 0) * item.quantity), 0);
             let formattedTotal = 'NGN ' + totalAmount.toLocaleString() + '.00';
 
             pendingOrderData = {
@@ -1824,8 +1749,7 @@
                 senderName: senderName,
                 items: cart.map(c => `${c.name} [Size: ${c.selectedSize}] (Qty: ${c.quantity})`).join(', '),
                 total: '₦' + totalAmount.toLocaleString(),
-                status: 'Payment Pending',
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                status: 'Payment Pending'
             };
 
             isSubmittingOrder = false;
@@ -1869,39 +1793,27 @@
             isSubmittingOrder = true;
             if (btn) {
                 btn.disabled = true;
-                btn.innerText = 'Submitting order & sending notification...';
+                btn.innerText = 'Submitting order...';
                 btn.style.opacity = '0.6';
                 btn.style.cursor = 'not-allowed';
             }
 
-            db.collection("orders").add(pendingOrderData).then(() => {
-                emailjs.send("service_hw42hco", "template_order_success", {
-                    to_name: pendingOrderData.name,
-                    to_email: pendingOrderData.email,
-                    order_id: pendingOrderData.id,
-                    order_items: pendingOrderData.items,
-                    order_total: pendingOrderData.total,
-                    sender_name: pendingOrderData.senderName,
-                    delivery_address: pendingOrderData.address
-                }, "yd2vB_gHk7NOdjwNO").then(() => {
-                    console.log("Payment notification email sent successfully.");
-                }, (emailError) => {
-                    console.warn("Order saved to database, but automated email failed to send: ", emailError);
-                });
-
-                closePaymentContinuation();
-                document.getElementById('success-status-modal').style.display = 'flex';
-
-            }).catch(error => {
-                alert("Error saving order: " + error.message);
-                isSubmittingOrder = false;
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerText = 'I have made the payment';
-                    btn.style.opacity = '1';
-                    btn.style.cursor = 'pointer';
-                }
+            emailjs.send("service_hw42hco", "template_order_success", {
+                to_name: pendingOrderData.name,
+                to_email: pendingOrderData.email,
+                order_id: pendingOrderData.id,
+                order_items: pendingOrderData.items,
+                order_total: pendingOrderData.total,
+                sender_name: pendingOrderData.senderName,
+                delivery_address: pendingOrderData.address
+            }, "yd2vB_gHk7NOdjwNO").then(() => {
+                console.log("Payment notification email sent successfully.");
+            }, (emailError) => {
+                console.warn("Automated email failed to send: ", emailError);
             });
+
+            closePaymentContinuation();
+            document.getElementById('success-status-modal').style.display = 'flex';
         }
 
         function redirectToOrdersTab() {
@@ -1913,68 +1825,13 @@
         }
 
         function loadMyOrders() {
-            if (!currentUser) return;
-            db.collection("orders").where("userId", "==", currentUser.uid).orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-                const feed = document.getElementById('my-orders-feed');
-                feed.innerHTML = '';
-
-                if (snapshot.empty) {
-                    feed.innerHTML = '<p style="color:#64748b; font-size:0.88rem;">You have not placed any orders yet.</p>';
-                    return;
-                }
-
-                snapshot.forEach((doc) => {
-                    let ord = doc.data();
-                    let statusColor = '#f59e0b';
-                    let statusBadgeText = ord.status || 'Payment Pending';
-                    
-                    if (statusBadgeText.includes('Successful') || statusBadgeText.includes('Received')) {
-                        statusColor = '#16a34a';
-                    } else if (statusBadgeText.includes('Delivered')) {
-                        statusColor = '#2563eb';
-                    }
-
-                    feed.innerHTML += `
-                        <div class="order-card">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:5px;">
-                                <strong style="font-size:0.88rem; color:#1b365d;">Order ID: ${ord.id}</strong>
-                                <span style="background: #fef3c7; border: 1px solid #fde68a; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; color: ${statusColor}; font-weight:bold;">${statusBadgeText}</span>
-                            </div>
-                            <p style="font-size:0.82rem; margin-bottom:4px;"><strong>Items:</strong> ${ord.items}</p>
-                            <p style="font-size:0.82rem; margin-bottom:4px;"><strong>Total:</strong> ${ord.total}</p>
-                            <p style="font-size:0.82rem; margin-bottom:4px;"><strong>Sender Name:</strong> ${ord.senderName || 'N/A'}</p>
-                            <p style="font-size:0.82rem;"><strong>Delivery Address:</strong> ${ord.address}</p>
-                        </div>
-                    `;
-                });
-            }, (error) => {
-                console.error("Error loading orders: ", error);
-            });
+            const feed = document.getElementById('my-orders-feed');
+            feed.innerHTML = '<p style="color:#64748b; font-size:0.88rem;">No orders recorded yet.</p>';
         }
 
         function loadReviews() {
-            db.collection("reviews").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-                const feed = document.getElementById('reviews-feed');
-                feed.innerHTML = '';
-
-                if (snapshot.empty) {
-                    seedDefaultReviews();
-                    return;
-                }
-
-                snapshot.forEach((doc) => {
-                    let r = doc.data();
-                    feed.innerHTML += `
-                        <div class="review-card">
-                            <div style="color:var(--accent-gold); margin-bottom:4px;">${r.rating}</div>
-                            <p style="margin-bottom:6px; font-size:0.88rem;">"${r.comment}"</p>
-                            <small style="color:#64748b;">— ${r.name}</small>
-                        </div>
-                    `;
-                });
-            }, (error) => {
-                console.error("Error loading reviews: ", error);
-            });
+            const feed = document.getElementById('reviews-feed');
+            feed.innerHTML = '<p style="color:#64748b; font-size:0.88rem;">No reviews yet.</p>';
         }
 
         function submitReview() {
@@ -1993,29 +1850,9 @@
                 return;
             }
 
-            db.collection("reviews").add({
-                userId: currentUser.uid,
-                name: name,
-                rating: rating,
-                comment: comment,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                alert('Review posted successfully!');
-                document.getElementById('rev-name').value = '';
-                document.getElementById('rev-comment').value = '';
-            }).catch(error => {
-                alert('Error posting review: ' + error.message);
-            });
-        }
-
-        function seedDefaultReviews() {
-            const defaultReviews = [
-                { name: 'Marcus T.', rating: '★★★★★', comment: 'The quality of the tech fleece tracksuit is top tier.', timestamp: firebase.firestore.FieldValue.serverTimestamp() },
-                { name: 'Sarah E.', rating: '★★★★★', comment: 'Fast delivery after bank transfer verification.', timestamp: firebase.firestore.FieldValue.serverTimestamp() }
-            ];
-            defaultReviews.forEach(rev => {
-                db.collection("reviews").add(rev).catch(err => console.error("Error seeding review: ", err));
-            });
+            alert('Review submitted successfully!');
+            document.getElementById('rev-name').value = '';
+            document.getElementById('rev-comment').value = '';
         }
 
         function openAdminModalDirect() {
@@ -2081,18 +1918,6 @@
 
                         let quality = 0.7;
                         let dataUrl = canvas.toDataURL('image/jpeg', quality);
-                        
-                        const getBase64Size = (b64) => {
-                            let stringLength = b64.length - (b64.indexOf(',') + 1);
-                            return 4 * Math.ceil(stringLength / 3) * 0.562489635538;
-                        };
-
-                        let maxBytes = maxMb * 1024 * 1024;
-                        while (getBase64Size(dataUrl) > maxBytes && quality > 0.1) {
-                            quality -= 0.1;
-                            dataUrl = canvas.toDataURL('image/jpeg', quality);
-                        }
-
                         resolve(dataUrl);
                     };
                     img.src = e.target.result;
@@ -2117,185 +1942,22 @@
                 return;
             }
 
-            let sizeCheckboxes = document.querySelectorAll('input[name="new-size"]:checked');
-            let sizes = [];
-            let stockStatus = [];
-            sizeCheckboxes.forEach(cb => {
-                sizes.push(cb.value);
-                stockStatus.push(true);
-            });
-
-            if (sizes.length === 0) {
-                alert('Please select at least one available size.');
-                return;
-            }
-
-            alert('Compressing images to fit database requirements. Please wait...');
-
-            let imagesArray = [];
-            for (let i = 0; i < fileInput.files.length; i++) {
-                let compressedDataUrl = await compressImage(fileInput.files[i], 0.2);
-                imagesArray.push(compressedDataUrl);
-            }
-
-            pushProductToDb(name, price, desc, imagesArray, sizes, stockStatus);
-        }
-
-        function pushProductToDb(name, price, description, images, sizes, stockStatus) {
-            db.collection("products").add({
-                name,
-                price,
-                description,
-                images,
-                image: images[0],
-                sizes,
-                stockStatus,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then((docRef) => {
-                alert('Product published successfully!');
-                closeAddProductModal();
-                document.getElementById('new-prod-name').value = '';
-                document.getElementById('new-prod-price').value = '';
-                document.getElementById('new-prod-desc').value = '';
-                document.getElementById('new-prod-img-files').value = '';
-            }).catch(error => {
-                alert('FIREBASE ERROR: ' + error.code + '\n\nMESSAGE: ' + error.message);
-            });
+            alert('Product details received successfully! (Database storage is currently disabled)');
+            closeAddProductModal();
+            document.getElementById('new-prod-name').value = '';
+            document.getElementById('new-prod-price').value = '';
+            document.getElementById('new-prod-desc').value = '';
+            document.getElementById('new-prod-img-files').value = '';
         }
 
         function loadAdminProducts() {
-            db.collection("products").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-                const tbody = document.getElementById('admin-products-body');
-                tbody.innerHTML = '';
-
-                if (snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#64748b;">No products found in store.</td></tr>';
-                    return;
-                }
-
-                snapshot.forEach((doc) => {
-                    let p = doc.data();
-                    let pId = doc.id;
-                    let sizeTogglesHtml = '';
-                    let imagesList = p.images && p.images.length > 0 ? p.images : [p.image];
-                    
-                    let thumbsHtml = '';
-                    imagesList.forEach(imgUrl => {
-                        thumbsHtml += `<img src="${imgUrl}" style="width:35px; height:40px; object-fit:cover; border-radius:3px; margin-right:3px;" alt="thumb">`;
-                    });
-
-                    let productSizes = p.sizes || ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-                    productSizes.forEach((sz, idx) => {
-                        let isAvailable = p.stockStatus ? p.stockStatus[idx] : true;
-                        sizeTogglesHtml += `<button onclick="toggleProductStock('${pId}', ${idx}, ${!isAvailable})" class="btn-approve" style="background:${isAvailable ? '#16a34a' : '#dc2626'}; margin-right:4px; margin-bottom:4px;">${sz}: ${isAvailable ? 'In Stock' : 'Out of Stock'}</button>`;
-                    });
-
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><div style="display:flex; flex-wrap:wrap;">${thumbsHtml}</div></td>
-                            <td><strong>${p.name}</strong><br><small style="color:#64748b;">${p.description || 'No description'}</small></td>
-                            <td style="font-weight:bold; color:var(--accent-gold);">${p.price}</td>
-                            <td>${sizeTogglesHtml}</td>
-                            <td>
-                                <button class="btn-danger" onclick="deleteProduct('${pId}')">Delete Product</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            }, (error) => {
-                console.error("Error loading admin products: ", error);
-            });
-        }
-
-        function toggleProductStock(productId, sizeIndex, newStatus) {
-            db.collection("products").doc(productId).get().then((doc) => {
-                if (doc.exists) {
-                    let data = doc.data();
-                    let currentStock = data.stockStatus || new Array(data.sizes.length).fill(true);
-                    currentStock[sizeIndex] = newStatus;
-                    db.collection("products").doc(productId).update({
-                        stockStatus: currentStock
-                    }).then(() => {
-                        console.log("Stock updated successfully.");
-                    }).catch(error => {
-                        alert('Sync Error updating stock: ' + error.message);
-                    });
-                }
-            }).catch(error => {
-                alert('Error fetching product for stock update: ' + error.message);
-            });
-        }
-
-        function deleteProduct(productId) {
-            if (confirm('Are you sure you want to permanently delete this product from the store?')) {
-                db.collection("products").doc(productId).delete().then(() => {
-                    alert('Product deleted globally.');
-                }).catch(error => {
-                    alert('Sync Error deleting product: ' + error.message);
-                });
-            }
+            const tbody = document.getElementById('admin-products-body');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#64748b;">No products found in store.</td></tr>';
         }
 
         function loadAdminOrders() {
-            db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-                const tbody = document.getElementById('admin-orders-body');
-                tbody.innerHTML = '';
-                
-                if (snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#64748b;">No global orders found yet.</td></tr>';
-                    return;
-                }
-
-                snapshot.forEach((doc) => {
-                    let ord = doc.data();
-                    let docId = doc.id;
-                    let statusText = ord.status || 'Payment Pending';
-                    let statusColor = '#f59e0b';
-                    if (statusText.includes('Successful') || statusText.includes('Received')) {
-                        statusColor = '#16a34a';
-                    } else if (statusText.includes('Delivered')) {
-                        statusColor = '#2563eb';
-                    }
-
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${ord.id}</td>
-                            <td>${ord.name}<br><small style="color:#64748b;">${ord.email}<br>${ord.phone}</small></td>
-                            <td style="font-weight:bold; color:var(--accent-orange);">${ord.senderName || 'N/A'}</td>
-                            <td>${ord.address || 'N/A'}</td>
-                            <td>${ord.items}</td>
-                            <td>${ord.total}</td>
-                            <td style="color: ${statusColor}; font-weight:bold;">${statusText}</td>
-                            <td>
-                                <button class="btn-approve" onclick="approvePayment('${docId}', '${ord.name}', '${ord.email}', '${ord.id}', '${ord.items}', '${ord.total}')">Mark Success</button>
-                                <button class="btn-deliver" onclick="markDelivered('${docId}')">Mark Delivered</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            }, (error) => {
-                console.error("Error loading admin orders: ", error);
-            });
-        }
-
-        function approvePayment(docId, name, email, orderId, items, total) {
-            db.collection("orders").doc(docId).update({
-                status: 'Payment Received & Dispatched'
-            }).then(() => {
-                alert(`Payment verified for ${name}! Status updated successfully.`);
-            }).catch(error => {
-                alert('Sync Error approving payment: ' + error.message);
-            });
-        }
-
-        function markDelivered(docId) {
-            db.collection("orders").doc(docId).update({
-                status: 'Delivered 📦'
-            }).then(() => {
-                alert('Order marked as Delivered successfully!');
-            }).catch(error => {
-                alert('Sync Error updating status: ' + error.message);
-            });
+            const tbody = document.getElementById('admin-orders-body');
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#64748b;">No global orders found yet.</td></tr>';
         }
 
         loadProducts();
