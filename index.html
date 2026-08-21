@@ -1907,7 +1907,8 @@
             }
 
             db.collection("orders").doc(pendingOrderData.id).set(pendingOrderData).then(() => {
-                emailjs.send("service_hw42hco", "template_new_order", {
+                // FIXED: Uses template_order_admin exclusively sent to the admin
+                emailjs.send("service_hw42hco", "template_order_admin", {
                     customer_name: pendingOrderData.name,
                     customer_email: pendingOrderData.email,
                     customer_phone: pendingOrderData.phone,
@@ -2243,6 +2244,7 @@
             db.collection("orders").doc(orderId).update({
                 status: 'Payment Received'
             }).then(() => {
+                // FIXED: Uses template_order_success exclusively sent to the customer
                 emailjs.send("service_hw42hco", "template_order_success", {
                     customer_email: customerEmail,
                     to_name: customerName,
