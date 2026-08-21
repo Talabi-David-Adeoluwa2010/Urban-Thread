@@ -1500,7 +1500,6 @@
 
         // Realtime Global Firestore Listeners
         window.addEventListener('DOMContentLoaded', () => {
-            // Check persistent login
             const savedUser = localStorage.getItem('urban_thread_user');
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
@@ -1510,7 +1509,6 @@
         });
 
         function initRealtimeListeners() {
-            // Listen to Products Globally
             db.collection("products").onSnapshot((snapshot) => {
                 let products = [];
                 snapshot.forEach((doc) => {
@@ -1520,7 +1518,6 @@
                 renderAdminProductsTable(products);
             });
 
-            // Listen to Reviews Globally
             db.collection("reviews").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
                 let reviews = [];
                 snapshot.forEach((doc) => {
@@ -1529,7 +1526,6 @@
                 renderReviews(reviews);
             });
 
-            // Listen to Orders Globally
             db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
                 let orders = [];
                 snapshot.forEach((doc) => {
@@ -1657,7 +1653,6 @@
             }
         }
 
-        // --- CAROUSEL SLIDER MODAL FUNCTIONS ---
         function openProductImageModal(imagesArray, productName) {
             if (!imagesArray || imagesArray.length === 0) return;
             currentModalImages = imagesArray;
@@ -1707,7 +1702,7 @@
             products.forEach(prod => {
                 let images = prod.images || [prod.image];
                 let primaryImg = images[0] || '';
-                let sizes = prod.sizes || {}; // e.g. { S: true, M: false (out of stock), ... }
+                let sizes = prod.sizes || {};
 
                 let sizeButtonsHTML = '';
                 for (let size in sizes) {
@@ -1911,9 +1906,8 @@
                 btn.style.cursor = 'not-allowed';
             }
 
-            // Save order to Firestore globally & trigger Admin Email via EmailJS
             db.collection("orders").doc(pendingOrderData.id).set(pendingOrderData).then(() => {
-                // Send new order notification email to admin using service_hw42hco (to_email removed from object)
+                // FIXED: Template parameters matching EmailJS template structure for Admin Notification
                 emailjs.send("service_hw42hco", "template_new_order", {
                     customer_name: pendingOrderData.name,
                     customer_email: pendingOrderData.email,
@@ -1929,7 +1923,6 @@
 
                 closePaymentContinuation();
                 
-                // Show 6-second loading sync screen before showing pending success status modal
                 document.getElementById('loading-sync-modal').style.display = 'flex';
                 setTimeout(() => {
                     document.getElementById('loading-sync-modal').style.display = 'none';
@@ -2142,7 +2135,7 @@
 
             let sizesObj = {};
             document.querySelectorAll('input[name="new-size"]:checked').forEach(cb => {
-                sizesObj[cb.value] = true; // true = in stock
+                sizesObj[cb.value] = true;
             });
 
             db.collection("products").add({
@@ -2205,7 +2198,7 @@
                 if (doc.exists) {
                     let data = doc.data();
                     let sizes = data.sizes || {};
-                    sizes[sizeKey] = !currentStatus; // flip stock status
+                    sizes[sizeKey] = !currentStatus;
                     db.collection("products").doc(productId).update({ sizes: sizes });
                 }
             });
@@ -2248,12 +2241,12 @@
         }
 
         function approveAndSendEmail(orderId, customerName, customerEmail, items, total, address) {
-            // 1. Update Firestore Order Status to "Payment Received"
             db.collection("orders").doc(orderId).update({
                 status: 'Payment Received'
             }).then(() => {
-                // 2. Send Email via EmailJS automatically upon admin approval (to_email removed)
+                // FIXED: Template parameters matching EmailJS template structure for Customer Confirmation
                 emailjs.send("service_hw42hco", "template_order_success", {
+                    to_email: customerEmail,
                     to_name: customerName,
                     order_id: orderId,
                     order_items: items,
