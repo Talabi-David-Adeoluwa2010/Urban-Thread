@@ -2108,66 +2108,77 @@
         }
 
         async function saveNewProductToFirestore() {
-            let name = document.getElementById('new-prod-name').value;
-            let price = document.getElementById('new-prod-price').value;
-            let desc = document.getElementById('new-prod-desc').value;
-            let fileInput = document.getElementById('new-prod-img-files');
+    console.log("Starting product save process...");
+    let name = document.getElementById('new-prod-name').value;
+    let price = document.getElementById('new-prod-price').value;
+    let desc = document.getElementById('new-prod-desc').value;
+    let fileInput = document.getElementById('new-prod-img-files');
 
-            if (!name || !price) {
-                alert('Please fill in at least the product name and price.');
-                return;
-            }
+    if (!name || !price) {
+        console.warn("Validation failed: Name or price missing.");
+        alert('Please fill in at least the product name and price.');
+        return;
+    }
 
-            if (!fileInput.files || fileInput.files.length < 3 || fileInput.files.length > 5) {
-                alert('Please select between 3 to 5 images for this product.');
-                return;
-            }
+    if (!fileInput.files || fileInput.files.length < 3 || fileInput.files.length > 5) {
+        console.warn("Validation failed: Incorrect number of images.", fileInput.files ? fileInput.files.length : 0);
+        alert('Please select between 3 to 5 images for this product.');
+        return;
+    }
 
-            let sizeCheckboxes = document.querySelectorAll('input[name="new-size"]:checked');
-            let sizes = [];
-            let stockStatus = [];
-            sizeCheckboxes.forEach(cb => {
-                sizes.push(cb.value);
-                stockStatus.push(true);
-            });
+    let sizeCheckboxes = document.querySelectorAll('input[name="new-size"]:checked');
+    let sizes = [];
+    let stockStatus = [];
+    sizeCheckboxes.forEach(cb => {
+        sizes.push(cb.value);
+        stockStatus.push(true);
+    });
 
-            if (sizes.length === 0) {
-                alert('Please select at least one available size.');
-                return;
-            }
+    if (sizes.length === 0) {
+        console.warn("Validation failed: No sizes selected.");
+        alert('Please select at least one available size.');
+        return;
+    }
 
-            alert('Compressing images. Please wait a moment...');
+    console.log("Images selected. Starting compression...");
+    alert('Compressing images. Please wait a moment...');
 
-            let imagesArray = [];
-            for (let i = 0; i < fileInput.files.length; i++) {
-                let compressedDataUrl = await compressImage(fileInput.files[i], 0.6);
-                imagesArray.push(compressedDataUrl);
-            }
+    let imagesArray = [];
+    for (let i = 0; i < fileInput.files.length; i++) {
+        console.log(`Compressing image ${i + 1} of ${fileInput.files.length}...`);
+        let compressedDataUrl = await compressImage(fileInput.files[i], 0.6);
+        imagesArray.push(compressedDataUrl);
+    }
 
-            pushProductToDb(name, price, desc, imagesArray, sizes, stockStatus);
-        }
+    console.log("All images compressed successfully. Pushing to database...");
+    pushProductToDb(name, price, desc, imagesArray, sizes, stockStatus);
+}
 
-        function pushProductToDb(name, price, description, images, sizes, stockStatus) {
-            db.collection("products").add({
-                name,
-                price,
-                description,
-                images,
-                image: images[0],
-                sizes,
-                stockStatus,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                alert('Product published successfully!');
-                closeAddProductModal();
-                document.getElementById('new-prod-name').value = '';
-                document.getElementById('new-prod-price').value = '';
-                document.getElementById('new-prod-desc').value = '';
-                document.getElementById('new-prod-img-files').value = '';
-            }).catch(error => {
-                alert('Sync Error publishing product: ' + error.message);
-            });
-        }
+function pushProductToDb(name, price, description, images, sizes, stockStatus) {
+    console.log("Attempting to write product to Firestore:", name);
+    db.collection("products").add({
+        name,
+        price,
+        description,
+        images,
+        image: images[0],
+        sizes,
+        stockStatus,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    }).then((docRef) => {
+        console.log("Product published successfully! Document ID:", docRef.id);
+        alert('Product published successfully!');
+        closeAddProductModal();
+        document.getElementById('new-prod-name').value = '';
+        document.getElementById('new-prod-price').value = '';
+        document.getElementById('new-prod-desc').value = '';
+        document.getElementById('new-prod-img-files').value = '';
+    }).catch(error => {
+        console.error("Sync Error publishing product to Firestore:", error);
+        alert('Sync Error publishing product: ' + error.message);
+    });
+}
+
 
         function loadAdminProducts() {
             db.collection("products").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
